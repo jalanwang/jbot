@@ -1,0 +1,4 @@
+[console_scripts]
+listener = my_first_topic_pkg.simple_subscriber:main
+talker = my_first_topic_pkg.simple_publisher:main
+

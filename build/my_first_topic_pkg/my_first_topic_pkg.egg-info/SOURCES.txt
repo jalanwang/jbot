@@ -1,0 +1,14 @@
+package.xml
+setup.cfg
+setup.py
+my_first_topic_pkg/__init__.py
+my_first_topic_pkg/simple_publisher.py
+my_first_topic_pkg/simple_subscriber.py
+my_first_topic_pkg.egg-info/PKG-INFO
+my_first_topic_pkg.egg-info/SOURCES.txt
+my_first_topic_pkg.egg-info/dependency_links.txt
+my_first_topic_pkg.egg-info/entry_points.txt
+my_first_topic_pkg.egg-info/requires.txt
+my_first_topic_pkg.egg-info/top_level.txt
+my_first_topic_pkg.egg-info/zip-safe
+resource/my_first_topic_pkg
