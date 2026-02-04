@@ -1,1 +1,0 @@
-/home/robot/robot_ws/build/urdf_tutorial/launch/robot_4.launch.py

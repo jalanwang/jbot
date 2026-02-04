@@ -1,1 +1,0 @@
-/home/robot/robot_ws/src/my_first_topic_pkg/setup.py

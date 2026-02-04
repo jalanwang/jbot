@@ -1,1 +1,29 @@
+# IDE/Editor
 .vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+*.egg-info/
+dist/
+*.egg
+
+# PyQt generated files
+*_rc.py
+ui_*_ui.py
+
+# ROS2 build artifacts
+build/
+install/
+log/
+
+# OS
+.DS_Store
+Thumbs.db

@@ -1,1 +1,0 @@
-/home/robot/robot_ws/src/urdf_tutorial/launch/sim.launch.py
