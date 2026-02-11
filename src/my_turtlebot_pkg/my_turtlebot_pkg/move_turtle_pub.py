@@ -9,7 +9,7 @@ from sensor_msgs.msg import LaserScan
 
 class MoveTurtle(Node):
   def __init__(self):
-    super().__init__('move_turtle')
+    super().__init__('move_turtle_pub') # Changed node name to 'move_turtle_pub'
     self.qos_profile = QoSProfile(depth = 10)
     self.move_turtle = self.create_publisher(Twist, '/cmd_vel', self.qos_profile)
     self.velocity = 0.0
