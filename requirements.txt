@@ -1,0 +1,28 @@
+# 기초 및 데이터 분석
+numpy
+pandas
+scipy
+matplotlib
+seaborn
+scikit-learn
+joblib
+
+# 이미지 및 비전
+opencv-python
+pillow
+
+# 딥러닝 (TensorFlow 기반)
+tensorflow
+keras
+tensorboard
+absl-py
+protobuf
+h5py
+
+# 개발 및 유틸리티
+ipython
+ipykernel
+jupyter_client
+requests
+certifi
+psutil

@@ -1,36 +1,72 @@
-# IDE/Editor
-.vscode/
-.idea/
-*.swp
-*.swo
-*~
+# ROS 2 build artifacts
+build/
+install/
+log/
+build_isolated/
+devel_isolated/
+install_isolated/
 
-# Python
+# Python artifacts
 __pycache__/
 *.py[cod]
 *$py.class
 *.so
 .Python
-*.egg-info/
+env/
+.venv/
+venv/
+ENV/
+develop-eggs/
 dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
 *.egg
+MANIFEST
 
-# PyQt generated files
-*_rc.py
-ui_*_ui.py
+# C++ artifacts
+*.o
+*.obj
+*.so
+*.a
+*.lib
+*.dll
+*.dylib
 
-# ROS2 build artifacts
-build/
-install/
-log/
+# Editor / IDE
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+.idea/
+*.swp
+*.swo
+*~
+*.sublime-workspace
+*.sublime-project
 
-# OS
+# OS generated files
 .DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
 Thumbs.db
-src/turtlebot3_ws/src/turtlebot3_simulations
 
-# Misc
+# Colcon
+COLCON_IGNORE
+
+# User specific (from previous config)
 my_gazebo_assets/
-src/turtlebot3
-src/turtlebot3_simulations
-.gitignore
+# src/turtlebot3
+# src/turtlebot3_simulations

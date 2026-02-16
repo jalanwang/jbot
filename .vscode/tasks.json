@@ -1,0 +1,30 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      /* 작업 라벨: Ctrl+Shift+P -> Tasks: Run Task에서 식별할 이름 */
+      "label": "colcon: build",
+      "type": "shell",
+      /* 빌드 명령어: 디버깅을 위해 CMAKE_BUILD_TYPE을 Debug로 고정 (심볼 포함) */
+      "command": "colcon build --cmake-args '-DCMAKE_BUILD_TYPE=Debug'",
+      "problemMatcher": [],
+      "group": {
+        /* 이 그룹을 build로 설정하고 기본값으로 지정하여 Ctrl+Shift+B 단축키와 연결 */
+        "kind": "build",
+        "isDefault": true
+      }
+    },
+    {
+      "label": "colcon: test",
+      "type": "shell",
+      /* 테스트 실행 후 결과를 즉시 터미널에 출력하도록 두 명령어를 결합 */
+      "command": "colcon test && colcon test-result"
+    },
+    {
+      "label": "colcon: clean",
+      "type": "shell",
+      /* 빌드/설치/로그 폴더를 삭제하여 워크스페이스를 초기 상태로 되돌림 */
+      "command": "rm -rf build install log"
+    }
+  ]
+}

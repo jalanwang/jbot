@@ -1,0 +1,52 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      /* 1. Python 노드 디버깅 설정 */
+      "name": "Debug-rclpy(debugpy)",
+      "type": "debugpy",
+      "request": "launch",
+      /* 현재 에디터에 열려 있는 파이썬 파일을 바로 실행 */
+      "program": "${file}",
+      "console": "integratedTerminal"
+    },
+    {
+      /* 2. C++ 노드 디버깅 설정 (GDB 기반) */
+      "name": "Debug-rclcpp(gbd)",
+      "type": "cppdbg",
+      "request": "launch",
+      /* 빌드 결과물(install 폴더) 내의 실행 파일 경로를 동적으로 구성 */
+      "program": "${workspaceFolder}/install/${input:package}/lib/${input:package}/${input:node}",
+      "args": [],
+      /* 디버깅 시작 전 tasks.json에 정의된 'colcon: build'를 실행하여 최신 소스 반영 */
+      "preLaunchTask": "colcon: build",
+      /* 시작 지점(main)에서 멈추도록 설정하여 초기화 로직 확인 가능 */
+      "stopAtEntry": true,
+      "cwd": "${workspaceFolder}",
+      "externalConsole": false,
+      "MIMode": "gdb",
+      "setupCommands": [
+        {
+          "description": "Enable pretty-printing for gdb",
+          "text": "-enable-pretty-printing",
+          "ignoreFailures": true
+        }
+      ]
+    }
+  ],
+  /* 디버그 실행 시 사용자에게 입력받을 변수 정의 */
+  "inputs": [
+    {
+      "id": "package",
+      "type": "promptString",
+      "description": "디버깅할 패키지 이름을 입력하세요",
+      "default": "topic_service_action_rclcpp_example"
+    },
+    {
+      "id": "node",
+      "type": "promptString",
+      "description": "디버깅할 노드(실행 파일) 이름을 입력하세요",
+      "default": "argument"
+    }
+  ]
+}
