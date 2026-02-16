@@ -3,6 +3,7 @@
 # 터틀을 움직이게 한다.
 # 현재 180를 바라보고 있다.
 # 0.3m 이내에 장애물이 있으면 멈춘다.
+# 수정중
 
 import rclpy
 from rclpy.node import Node

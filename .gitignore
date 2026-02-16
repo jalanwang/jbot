@@ -65,11 +65,10 @@ Thumbs.db
 
 # Colcon
 COLCON_IGNORE
-/log/*
+
 # User specific (from previous config)
 my_gazebo_assets/
 src/turtlebot3
 src/turtlebot3_msgs
 # src/turtlebot3_simulations
 src/turtlebot3_simulations
-.gitignore
