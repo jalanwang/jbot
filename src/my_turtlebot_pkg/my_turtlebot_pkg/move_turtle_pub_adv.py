@@ -1,3 +1,7 @@
+# ~/turtlebot3_ws/src/my_turtlebot_pkg/my_turtlebot_pkg/move_turtle_pub_adv.py
+# 키를 누르면 터틀봇이 움직인다.
+# 최고 속도 제한이 없다.
+
 import rclpy
 from rclpy.node import Node
 from geometry_msgs.msg import Twist
@@ -58,7 +62,7 @@ class MoveTurtle(Node):
         if count == 20:
             print("input wasd")
 
-  def get_key(self, settings):
+  def get_key(self, settings): # 전형적인 get_key 함수입니다. 키보드 입력을 비동기적으로 처리하기 위해 select 모듈을 사용합니다.
     if os.name == 'nt':
         return msvcrt.getch().decode('utf-8')
     tty.setraw(sys.stdin.fileno())

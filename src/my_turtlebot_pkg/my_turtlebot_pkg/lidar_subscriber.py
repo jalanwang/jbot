@@ -1,3 +1,8 @@
+# ~/turtlebot3_ws/src/my_turtlebot_pkg/my_turtlebot_pkg/lidar_subscriber.py
+# 라이다 센서 데이터를 구독하는 노드입니다.
+# LaserScan 메시지 타입을 사용하여 라이다 데이터를 처리한다.
+# 현재 정면만 바라보고 있다.
+
 import rclpy
 from rclpy.node import Node
 from rclpy.qos import QoSProfile
@@ -22,8 +27,8 @@ class LidarSubscriber(Node):
             qos_profile)
 
     def subscribe_topic_message(self, msg):
-        # 5. LaserScan은 msg.data가 아니라 msg.ranges에 거리 데이터가 배열로 들어있어.
-        # 정면(0도)의 거리 값을 출력해볼게.
+        # 5. LaserScan은 msg.data가 아니라 msg.ranges에 거리 데이터가 배열로 들어간다.
+        # 정면(0도)의 거리 값을 출력.
         self.get_logger().info('정면 거리: {0} m'.format(msg.ranges[0]))
 
 def main(args=None):
