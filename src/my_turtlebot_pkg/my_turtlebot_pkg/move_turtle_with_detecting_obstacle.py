@@ -42,6 +42,7 @@ class MoveTurtle(Node):
     #self.settings = termios.tcgetattr(sys.stdin)
     self.key_parser = KeyParser()
     self.scan_ranges = []
+    self.front_min = 0.0
 
   def scan_callback(self, msg):
     self.scan_ranges = msg.ranges
@@ -53,8 +54,19 @@ class MoveTurtle(Node):
     # 라이다 우회전, 전방 정면에서 오른쪽 90도 까지
     right_min = min(self.scan_ranges[right_range:scan_range])
     # 라이다 우회전, 전방 정면에서 왼쪽 90도 까지
+
+    front_range = int(scan_range / 2)
+    self.front_min = min(self.scan_ranges[front_range - 10:front_range + 10])
+
     self.get_logger().info(f'left_min:{left_min},right_min: {right_min}', throttle_duration_sec=2)
-    self.get_logger().info(f'viewAngle: {len(self.scan_ranges)}', throttle_duration_sec=2)
+    #self.get_logger().info(f'viewAngle: {len(self.scan_ranges)}', throttle_duration_sec=2)
+
+  def is_obstacle_ahead(self):
+    if not self.has_scan_received:
+      return False
+
+    return self.front_min < 0.3
+    # 장애물이 0.3m 이내에 있으면 True 반환, 그렇지 않으면 False 반환
 
   def turtle_key_move(self):
     count = 0
@@ -102,7 +114,7 @@ def main(args=None):
   rclpy.init(args=args)
   node = MoveTurtle()
   try:
-    node.turtle_key_move()
+    rclpy.spin(node)
   except KeyboardInterrupt:
     node.get_logger().info('Keyboard interrupt!!!!')
   finally:
@@ -110,4 +122,5 @@ def main(args=None):
     rclpy.shutdown()
 
 if __name__ == '__main__':
-  main()
+	  main()
+
