@@ -18,7 +18,7 @@ from sensor_msgs.msg import LaserScan
 # import select
 # import sys
 
-from my_package. my_utilz import KeyParser
+from my_turtlebot_pkg.my_package.my_utilz import KeyParser
 # KeyParser 클래스는 키보드 입력을 비동기적으로 처리하기 위한 유틸리티 클래스.
 
 class MoveTurtle(Node):
