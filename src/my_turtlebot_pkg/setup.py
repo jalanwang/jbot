@@ -37,6 +37,8 @@ setup(
           'detect_obstacle = my_turtlebot_pkg.detect_obstacle:main',
           'detect_obstacle_aperature = my_turtlebot_pkg.detect_obstacle_aperature:main',
           'move_turtle_with_detecting_obstacle = my_turtlebot_pkg.move_turtle_with_detecting_obstacle:main',
+          'move_turtle_by_controller = my_turtlebot_pkg.move_turtle_by_controller:main',
+          'move_turtle_by_controller_rclpy = my_turtlebot_pkg.move_turtle_by_controller_rclpy:main',
 
         ],
     },
