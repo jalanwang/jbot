@@ -31,35 +31,27 @@ class MoveTurtle(Node):
 
     self.has_scan_received = False # 라이다 데이터를 받았는지 여부를 추적하는 플래그
     self.qos_profile = QoSProfile(depth = 10)
-    self.scan_sub = self.create_subscription(
-      LaserScan,
-      '/scan',
-      self.scan_callback,
-      qos_profile=qos_profile_sensor_data)
+    self.scan_sub = self.create_subscription(LaserScan, '/scan', self.scan_callback, qos_profile=qos_profile_sensor_data)
+    # scan_sub는 LaserScan 메시지를 /scan 토픽에서 구독하는 서브스크라이버 인터페이스.
+    # qos_profile_sensor_data는 센서 데이터에 적합한 QoS 설정을 사용.
 
     self.velocity = 0.0
     self.angular = 0.0
-    #self.settings = termios.tcgetattr(sys.stdin)
-    self.key_parser = KeyParser()
-    self.scan_ranges = []
-    self.front_min = 0.0
+    self.key_parser = KeyParser() # KeyParser 클래스의 인스턴스를 생성하여 키보드 입력을 처리하는 객체를 초기화
+    self.scan_ranges = [] # 라이다 데이터의 범위를 저장하는 리스트
+    self.front_min = 0.0 # 라이다 데이터에서 전방의 최소 거리값을 저장하는 변수
 
   def scan_callback(self, msg):
+    #라이다 CW 가정
     self.scan_ranges = msg.ranges
     self.has_scan_received = True
     scan_range = len(self.scan_ranges) -1 # 라이다 데이터의 개수
-    left_range = int(scan_range / 4)
-    right_range = int(scan_range * 3 / 4)
-    left_min = min(self.scan_ranges[0:left_range])
-    # 라이다 우회전, 전방 정면에서 오른쪽 90도 까지
-    right_min = min(self.scan_ranges[right_range:scan_range])
-    # 라이다 우회전, 전방 정면에서 왼쪽 90도 까지
+    right_range = int(scan_range / 8) # 45도
+    left_range = int(scan_range * 7 / 8) # one round -45도
 
-    front_range = int(scan_range / 2)
-    self.front_min = min(self.scan_ranges[front_range - 10:front_range + 10])
+    front_ranges = self.scan_ranges[0:right_range] + self.scan_ranges[left_range:]
 
-    self.get_logger().info(f'left_min:{left_min},right_min: {right_min}', throttle_duration_sec=2)
-    #self.get_logger().info(f'viewAngle: {len(self.scan_ranges)}', throttle_duration_sec=2)
+    self.front_min = min(front_ranges) # 전방의 최소 거리값을 계산하여 front_min 변수에 저장
 
   def is_obstacle_ahead(self):
     if not self.has_scan_received:
@@ -69,33 +61,25 @@ class MoveTurtle(Node):
     # 장애물이 0.3m 이내에 있으면 True 반환, 그렇지 않으면 False 반환
 
   def turtle_key_move(self):
-    count = 0
     msg = Twist()
     print("input wasdx")
     while True:
-      #input_key = self.get_key(self.settings)
+      rclpy.spin_once(self, timeout_sec=0)
+      # ROS2 이벤트 루프(머 들어온것 있어?)를 한 번 실행하여 콜백 함수가 호출되도록 함
+      # 돌아오면 바로 아래로 돌아가도록 타임아웃 0 설정
+
       input_key = self.key_parser.get_key()
       if input_key in ['w','W']:
-        count += 1
         self.velocity += 0.1
-        self.get_logger().info(f'Published message: {msg.linear}, {msg.angular}')
       elif input_key in ['s','S']:
         self.velocity = 0.0
         self.angular = 0.0
-        count += 1
-        self.get_logger().info(f'Published message: {msg.linear}, {msg.angular}')
       elif input_key in ['x','X']:
         self.velocity += -0.1
-        count += 1
-        self.get_logger().info(f'Published message: {msg.linear}, {msg.angular}')
       elif input_key in ['a','A']:
         self.angular += 0.1
-        count += 1
-        self.get_logger().info(f'Published message: {msg.linear}, {msg.angular}')
       elif input_key in ['d','D']:
         self.angular -= 0.1
-        count += 1
-        self.get_logger().info(f'Published message: {msg.linear}, {msg.angular}')
       elif input_key == '\x03':
         break
 
@@ -106,15 +90,20 @@ class MoveTurtle(Node):
       msg.angular.x = 0.0
       msg.angular.y = 0.0
       msg.angular.z = self.angular
-      self.cmd_vel_publisher.publish(msg)
-      if count == 20:
-        print("input wasd")
+
+      if(self.is_obstacle_ahead() and self.velocity > 0):
+        self.get_logger().info(f'Obstacle 발견!: {self.front_min}', throttle_duration_sec=1)
+        msg.linear.x = 0.0
+        msg.angular.z = 0.0
+      else:
+        self.get_logger().info(f'No Obstacle: {self.front_min}', throttle_duration_sec=1)
+      self.cmd_vel_publisher.publish(msg) # cmd_vel 토픽에 Twist 메시지를 발행하여 터틀봇의 속도와 회전 속도를 제어
 
 def main(args=None):
   rclpy.init(args=args)
   node = MoveTurtle()
   try:
-    rclpy.spin(node)
+    node.turtle_key_move()
   except KeyboardInterrupt:
     node.get_logger().info('Keyboard interrupt!!!!')
   finally:
