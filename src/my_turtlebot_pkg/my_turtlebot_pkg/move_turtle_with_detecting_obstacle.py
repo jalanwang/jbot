@@ -12,11 +12,14 @@ from rclpy.qos import QoSProfile
 from rclpy.qos import qos_profile_sensor_data
 from sensor_msgs.msg import LaserScan
 
-import termios
-import tty
-import os
-import select
-import sys
+# import termios
+# import tty
+# import os
+# import select
+# import sys
+
+from my_package. my_utilz import KeyParser
+# KeyParser 클래스는 키보드 입력을 비동기적으로 처리하기 위한 유틸리티 클래스.
 
 class MoveTurtle(Node):
   def __init__(self):
@@ -36,63 +39,64 @@ class MoveTurtle(Node):
 
     self.velocity = 0.0
     self.angular = 0.0
-    self.settings = termios.tcgetattr(sys.stdin)
+    #self.settings = termios.tcgetattr(sys.stdin)
+    self.key_parser = KeyParser()
     self.scan_ranges = []
 
+  def scan_callback(self, msg):
+    self.scan_ranges = msg.ranges
+    self.has_scan_received = True
+    scan_range = len(self.scan_ranges) -1 # 라이다 데이터의 개수
+    left_range = int(scan_range / 4)
+    right_range = int(scan_range * 3 / 4)
+    left_min = min(self.scan_ranges[0:left_range])
+    # 라이다 우회전, 전방 정면에서 오른쪽 90도 까지
+    right_min = min(self.scan_ranges[right_range:scan_range])
+    # 라이다 우회전, 전방 정면에서 왼쪽 90도 까지
+    self.get_logger().info(f'left_min:{left_min},right_min: {right_min}', throttle_duration_sec=2)
+    self.get_logger().info(f'viewAngle: {len(self.scan_ranges)}', throttle_duration_sec=2)
 
   def turtle_key_move(self):
     count = 0
     msg = Twist()
-    print("input wasd")
+    print("input wasdx")
     while True:
-        input_key = self.get_key(self.settings)
-        if input_key in ['w','W']:
-            count += 1
-            self.velocity += 0.1
-            self.get_logger().info(f'Published mesage: {msg.linear}, {msg.angular}')
-        elif input_key in ['s','S']:
-            self.velocity = 0.0
-            self.angular = 0.0
-            count += 1
-            self.get_logger().info(f'Published mesage: {msg.linear}, {msg.angular}')
-        elif input_key in ['x','X']:
-            self.velocity += -0.1
-            count += 1
-            self.get_logger().info(f'Published mesage: {msg.linear}, {msg.angular}')
-        elif input_key in ['a','A']:
-            self.angular += 0.1
-            count += 1
-            self.get_logger().info(f'Published mesage: {msg.linear}, {msg.angular}')
-        elif input_key in ['d','D']:
-            self.angular -= 0.1
-            count += 1
-            self.get_logger().info(f'Published mesage: {msg.linear}, {msg.angular}')
-        elif input_key == '\x03':
-            break
+      #input_key = self.get_key(self.settings)
+      input_key = self.key_parser.get_key()
+      if input_key in ['w','W']:
+        count += 1
+        self.velocity += 0.1
+        self.get_logger().info(f'Published message: {msg.linear}, {msg.angular}')
+      elif input_key in ['s','S']:
+        self.velocity = 0.0
+        self.angular = 0.0
+        count += 1
+        self.get_logger().info(f'Published message: {msg.linear}, {msg.angular}')
+      elif input_key in ['x','X']:
+        self.velocity += -0.1
+        count += 1
+        self.get_logger().info(f'Published message: {msg.linear}, {msg.angular}')
+      elif input_key in ['a','A']:
+        self.angular += 0.1
+        count += 1
+        self.get_logger().info(f'Published message: {msg.linear}, {msg.angular}')
+      elif input_key in ['d','D']:
+        self.angular -= 0.1
+        count += 1
+        self.get_logger().info(f'Published message: {msg.linear}, {msg.angular}')
+      elif input_key == '\x03':
+        break
 
-        msg.linear.x = self.velocity
-        msg.linear.y = 0.0
-        msg.linear.z = 0.0
+      msg.linear.x = self.velocity
+      msg.linear.y = 0.0
+      msg.linear.z = 0.0
 
-        msg.angular.x = 0.0
-        msg.angular.y = 0.0
-        msg.angular.z = self.angular
-        self.cmd_vel_publisher.publish(msg)
-        if count == 20:
-            print("input wasd")
-
-  def get_key(self, settings): # 전형적인 get_key 함수입니다. 키보드 입력을 비동기적으로 처리하기 위해 select 모듈을 사용합니다.
-    if os.name == 'nt':
-        return msvcrt.getch().decode('utf-8')
-    tty.setraw(sys.stdin.fileno())
-    rlist, _, _ = select.select([sys.stdin], [], [], 0.1)
-    if rlist:
-        key = sys.stdin.read(1)
-    else:
-        key = ''
-
-    termios.tcsetattr(sys.stdin, termios.TCSADRAIN, settings)
-    return key
+      msg.angular.x = 0.0
+      msg.angular.y = 0.0
+      msg.angular.z = self.angular
+      self.cmd_vel_publisher.publish(msg)
+      if count == 20:
+        print("input wasd")
 
 def main(args=None):
   rclpy.init(args=args)
