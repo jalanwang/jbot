@@ -93,9 +93,11 @@ class MoveTurtle(Node):
 
       if(self.is_obstacle_ahead() and self.velocity > 0):
         self.get_logger().info(f'Obstacle 발견!: {self.front_min}', throttle_duration_sec=1)
+        self.velocity = 0.0 # 필요 없는 것 같은데 일단 넣어봄. 장애물이 앞에 있으면 속도를 0으로 설정하여 멈추게 함
+        self.angular = 0.0 # 필요 없는 것 같은데 일단 넣어봄. 장애물이 앞에 있으면 회전 속도도 0으로 설정하여 멈추게 함
         msg.linear.x = 0.0
         msg.angular.z = 0.0
-      else:
+      elif(not self.is_obstacle_ahead()):
         self.get_logger().info(f'No Obstacle: {self.front_min}', throttle_duration_sec=1)
       self.cmd_vel_publisher.publish(msg) # cmd_vel 토픽에 Twist 메시지를 발행하여 터틀봇의 속도와 회전 속도를 제어
 
