@@ -12,7 +12,8 @@
   <depend>sensor_msgs</depend>
   <depend>geometry_msgs</depend>
   <depend>nav_msgs</depend>
-
+  <!-- PySide6 패키지에 대한 의존성 추가 -->
+  <depend>python3-pyside6</depend>
 
   <test_depend>ament_copyright</test_depend>
   <test_depend>ament_flake8</test_depend>

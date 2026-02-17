@@ -17,7 +17,8 @@ setup(
         # 내 패키지 디렉토리 내 my_package 폴더내의 모든 Python 파일을 포함하도록 수정
         (os.path.join('share', package_name, 'my_package'), glob('my_package/*.py')),
     ],
-    install_requires=['setuptools'],
+    install_requires=['setuptools', 'PySide6'], # PySide6 패키지에 대한 의존성 추가
+
     zip_safe=True,
     maintainer='robot',
     maintainer_email='jalanwang@gmail.com',
