@@ -1,0 +1,16 @@
+# Goal: 클라이언트가 서버에게 요청하는 내용
+int32 shape            # 이동할 모양 (3: 삼각형, 4: 사각형)
+float32 linear_velocity # 이동 속도 (m/s)
+float32 side_length     # 한 변의 길이 (m)
+
+# 모양 선택을 위한 상수 정의 (코드 가독성을 위해 추천)
+int32 TRIANGLE = 3
+int32 SQUARE = 4
+---
+# Result: 작업이 완료된 후 보내는 최종 결과
+bool success           # 임무 성공 여부
+float32 total_distance  # 실제로 이동한 총 거리
+---
+# Feedback: 작업 중에 실시간으로 보내는 상태
+int32 current_side      # 현재 몇 번째 변을 이동 중인지 (예: 1, 2, 3...)
+float32 remaining_distance # 현재 변에서 남은 거리
