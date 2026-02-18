@@ -36,16 +36,19 @@ class MainWindow(QMainWindow):
       self.logic_engine.move_forward()
 
     def pb_left_clicked(self):
-      self.logic_engine.turn_left()
+      self.logic_engine.update_key('w')
 
     def pb_stop_clicked(self):
-      self.logic_engine.stop()
+      self.logic_engine.update_key('a')
 
     def pb_right_clicked(self):
-      self.logic_engine.turn_right()
+      self.logic_engine.update_key('s')
 
     def pb_back_clicked(self):
-      self.logic_engine.move_backward()
+      self.logic_engine.update_key('d')
+
+    def pb_back_clicked(self):
+      self.logic_engine.update_key('x')
 
     def pb_triangle_clicked(self):
       self.logic_engine.action_triangle()
