@@ -26,7 +26,6 @@ class MoveTurtleLogic(Node):
     # cmd_vel_publisher는 Twist 메시지를 /cmd_vel 토픽에 발행하는 퍼블리셔 인터페이스
 
     self.has_scan_received = False # 라이다 데이터를 받았는지 여부를 추적하는 플래그
-    self.qos_profile = QoSProfile(depth = 10)
     self.scan_sub = self.create_subscription(LaserScan, '/scan', self.scan_callback, qos_profile=qos_profile_sensor_data)
     # scan_sub는 LaserScan 메시지를 /scan 토픽에서 구독하는 서브스크라이버 인터페이스.
     # qos_profile_sensor_data는 센서 데이터에 적합한 QoS 설정을 사용.
@@ -37,19 +36,21 @@ class MoveTurtleLogic(Node):
     self.front_min = 0.0 # 라이다 데이터에서 전방의 최소 거리값을 저장하는 변수
 
     self.log_queue = [] # 로직 엔진에서 발생하는 로그 메시지를 저장하는 큐.
-    print("input wasdx")
 
   def scan_callback(self, msg):
     #라이다 CW 가정
     self.scan_ranges = msg.ranges
     self.has_scan_received = True
-    scan_range = len(self.scan_ranges) -1 # 라이다 데이터의 개수
+    scan_range = len(self.scan_ranges)
+    if scan_range == 0:
+      return
+
     right_range = int(scan_range / 8) # 45도
     left_range = int(scan_range * 7 / 8) # one round -45도
 
     front_ranges = self.scan_ranges[0:right_range] + self.scan_ranges[left_range:]
-
-    self.front_min = min(front_ranges) # 전방의 최소 거리값을 계산하여 front_min 변수에 저장
+    if front_ranges:
+      self.front_min = min(front_ranges) # 전방의 최소 거리값을 계산하여 front_min 변수에 저장
 
   def is_obstacle_ahead(self):
     if not self.has_scan_received:
@@ -99,7 +100,7 @@ class MoveTurtleLogic(Node):
     # ROS2 이벤트 루프(머 들어온것 있어?)를 한 번 실행하여 콜백 함수가 호출되도록 함
     # 돌아오면 바로 아래로 돌아가도록 타임아웃 0 설정
 
-    log_text=f"Obstacle Dtected! Distance: {self.front_min: .2f}m"
+    log_text=f"Obstacle Detected! Distance: {self.front_min: .2f}m"
     if(self.is_obstacle_ahead() and self.velocity > 0):
       self.get_logger().info(f'Obstacle 발견!: {self.front_min}', throttle_duration_sec=1)
       self.add_log(log_text)
@@ -128,4 +129,3 @@ class MoveTurtleLogic(Node):
 
 # if __name__ == '__main__':
 # 	  main()
-

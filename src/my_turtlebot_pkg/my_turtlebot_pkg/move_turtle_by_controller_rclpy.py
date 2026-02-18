@@ -60,8 +60,8 @@ class MainWindow(QMainWindow):
     }
     ros_key = key_map.get(event.key())
     if ros_key:
-      if ros_key == 'triangle': self.logic_engine.action_triangle('1')
-      elif ros_key == 'square': self.logic_engine.action_square('2')
+      if ros_key == 'triangle': self.logic_engine.action_triangle()
+      elif ros_key == 'square': self.logic_engine.action_square()
       else: self.logic_engine.update_key(ros_key)
 
   def ros_main_loop(self):
