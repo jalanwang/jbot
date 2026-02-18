@@ -71,6 +71,9 @@ class Ui_MainWindow(object):
         self.txt_distance = QLabel(self.centralwidget)
         self.txt_distance.setObjectName(u"txt_distance")
         self.txt_distance.setGeometry(QRect(50, 500, 321, 17))
+        self.txt_pose = QLabel(self.centralwidget)
+        self.txt_pose.setObjectName(u"txt_pose")
+        self.txt_pose.setGeometry(QRect(50, 520, 321, 17))
         MainWindow.setCentralWidget(self.centralwidget)
         self.menubar = QMenuBar(MainWindow)
         self.menubar.setObjectName(u"menubar")
@@ -96,5 +99,6 @@ class Ui_MainWindow(object):
         self.pb_square.setText(QCoreApplication.translate("MainWindow", u"Square", None))
         self.label.setText(QCoreApplication.translate("MainWindow", u"Action!", None))
         self.txt_distance.setText(QCoreApplication.translate("MainWindow", u"TextLabel", None))
+        self.txt_pose.setText(QCoreApplication.translate("MainWindow", u"TextLabel", None))
     # retranslateUi
 

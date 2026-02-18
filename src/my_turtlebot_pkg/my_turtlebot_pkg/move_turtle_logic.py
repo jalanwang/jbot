@@ -12,9 +12,14 @@ from rclpy.qos import QoSProfile
 from rclpy.qos import qos_profile_sensor_data
 from sensor_msgs.msg import LaserScan
 
+from .turtle_pose_and_position import TurtlebotPose
+
 class MoveTurtleLogic(Node):
   def __init__(self):
     super().__init__('move_turtle_logic')
+
+    # 위치 추적 클래스 객체 생성
+    self.pose_tracker = TurtlebotPose(self)
 
     self.qos_profile = QoSProfile(depth = 10)
     self.cmd_vel_publisher = self.create_publisher(Twist, '/cmd_vel', self.qos_profile)
