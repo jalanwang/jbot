@@ -12,15 +12,6 @@ from rclpy.qos import QoSProfile
 from rclpy.qos import qos_profile_sensor_data
 from sensor_msgs.msg import LaserScan
 
-# import termios
-# import tty
-# import os
-# import select
-# import sys
-
-from my_turtlebot_pkg.my_package.my_utilz import KeyParser
-# KeyParser 클래스는 키보드 입력을 비동기적으로 처리하기 위한 유틸리티 클래스.
-
 class MoveTurtleLogic(Node):
   def __init__(self):
     super().__init__('move_turtle_logic')
@@ -37,9 +28,10 @@ class MoveTurtleLogic(Node):
 
     self.velocity = 0.0
     self.angular = 0.0
-    self.key_parser = KeyParser() # KeyParser 클래스의 인스턴스를 생성하여 키보드 입력을 처리하는 객체를 초기화
     self.scan_ranges = [] # 라이다 데이터의 범위를 저장하는 리스트
     self.front_min = 0.0 # 라이다 데이터에서 전방의 최소 거리값을 저장하는 변수
+
+    print("input wasdx")
 
   def scan_callback(self, msg):
     #라이다 CW 가정
@@ -60,58 +52,62 @@ class MoveTurtleLogic(Node):
     return self.front_min < 0.3
     # 장애물이 0.3m 이내에 있으면 True 반환, 그렇지 않으면 False 반환
 
-  def turtle_key_move(self):
-    msg = Twist()
-    print("input wasdx")
-    while True:
-      rclpy.spin_once(self, timeout_sec=0)
-      # ROS2 이벤트 루프(머 들어온것 있어?)를 한 번 실행하여 콜백 함수가 호출되도록 함
-      # 돌아오면 바로 아래로 돌아가도록 타임아웃 0 설정
+  def update_key(self, key):
+    # GUI에서 버튼 클릭 시 호출되는 함수로, 키 입력을 처리하여 터틀봇의 움직임을 제어하는 함수
+    if key in ['w','W']:
+      self.velocity += 0.1
+    elif key in ['s','S']:
+      self.velocity = 0.0
+      self.angular = 0.0
+    elif key in ['x','X']:
+      self.velocity += -0.1
+    elif key in ['a','A']:
+      self.angular += 0.1
+    elif key in ['d','D']:
+      self.angular -= 0.1
 
-      input_key = self.key_parser.get_key()
-      if input_key in ['w','W']:
-        self.velocity += 0.1
-      elif input_key in ['s','S']:
-        self.velocity = 0.0
-        self.angular = 0.0
-      elif input_key in ['x','X']:
-        self.velocity += -0.1
-      elif input_key in ['a','A']:
-        self.angular += 0.1
-      elif input_key in ['d','D']:
-        self.angular -= 0.1
-      elif input_key == '\x03':
-        break
+  def action_triangle(self):
+    # GUI에서 삼각형 버튼 클릭 시 호출되는 함수로, 특정 행동을 수행하도록 하는 함수
+    self.get_logger().info('Triangle button clicked!')
+    # 여기에 삼각형 버튼 클릭 시 수행할 행동을 구현
 
-      msg.linear.x = self.velocity
-      msg.linear.y = 0.0
-      msg.linear.z = 0.0
+  def action_square(self):
+    # GUI에서 사각형 버튼 클릭 시 호출되는 함수로, 특정 행동을 수행하도록 하는 함수
+    self.get_logger().info('Square button clicked!')
+    # 여기에 사각형 버튼 클릭 시 수행할 행동을 구현
 
-      msg.angular.x = 0.0
-      msg.angular.y = 0.0
-      msg.angular.z = self.angular
+  def update_and_publish(self):
+    msg = Twist() # Twist 메시지 객체를 생성하여 터틀봇의 선속도와 각속도를 설정하는 함수
 
-      if(self.is_obstacle_ahead() and self.velocity > 0):
-        self.get_logger().info(f'Obstacle 발견!: {self.front_min}', throttle_duration_sec=1)
-        self.velocity = 0.0 # 필요 없는 것 같은데 일단 넣어봄. 장애물이 앞에 있으면 속도를 0으로 설정하여 멈추게 함
-        self.angular = 0.0 # 필요 없는 것 같은데 일단 넣어봄. 장애물이 앞에 있으면 회전 속도도 0으로 설정하여 멈추게 함
-        msg.linear.x = 0.0
-        msg.angular.z = 0.0
-      elif(not self.is_obstacle_ahead()):
-        self.get_logger().info(f'No Obstacle: {self.front_min}', throttle_duration_sec=1)
-      self.cmd_vel_publisher.publish(msg) # cmd_vel 토픽에 Twist 메시지를 발행하여 터틀봇의 속도와 회전 속도를 제어
+    # rclpy.spin_once(self, timeout_sec=0)
+    # ROS2 이벤트 루프(머 들어온것 있어?)를 한 번 실행하여 콜백 함수가 호출되도록 함
+    # 돌아오면 바로 아래로 돌아가도록 타임아웃 0 설정
 
-def main(args=None):
-  rclpy.init(args=args)
-  node = MoveTurtleLogic()
-  try:
-    node.turtle_key_move()
-  except KeyboardInterrupt:
-    node.get_logger().info('Keyboard interrupt!!!!')
-  finally:
-    node.destroy_node()
-    rclpy.shutdown()
+    if(self.is_obstacle_ahead() and self.velocity > 0):
+      self.get_logger().info(f'Obstacle 발견!: {self.front_min}', throttle_duration_sec=1)
+      self.velocity = 0.0 # 필요 없는 것 같은데 일단 넣어봄. 장애물이 앞에 있으면 속도를 0으로 설정하여 멈추게 함
+      self.angular = 0.0 # 필요 없는 것 같은데 일단 넣어봄. 장애물이 앞에 있으면 회전 속도도 0으로 설정하여 멈추게 함
+      msg.linear.x = 0.0
+      msg.angular.z = 0.0
 
-if __name__ == '__main__':
-	  main()
+    else:
+      msg.linear.x = self.velocity # 값 변화 없이 진행
+      msg.angular.z = self.angular # 값 변화 없이 진행
+      self.get_logger().info(f'No Obstacle: {self.front_min}', throttle_duration_sec=1)
+
+    self.cmd_vel_publisher.publish(msg) # cmd_vel 토픽에 Twist 메시지를 발행하여 터틀봇의 속도와 회전 속도를 제어
+
+# def main(args=None):
+#   rclpy.init(args=args)
+#   node = MoveTurtleLogic()
+#   try:
+#     node.turtle_key_move()
+#   except KeyboardInterrupt:
+#     node.get_logger().info('Keyboard interrupt!!!!')
+#   finally:
+#     node.destroy_node()
+#     rclpy.shutdown()
+
+# if __name__ == '__main__':
+# 	  main()
 

@@ -39,6 +39,7 @@ setup(
           'move_turtle_with_detecting_obstacle = my_turtlebot_pkg.move_turtle_with_detecting_obstacle:main',
           'move_turtle_by_controller = my_turtlebot_pkg.move_turtle_by_controller:main',
           'move_turtle_by_controller_rclpy = my_turtlebot_pkg.move_turtle_by_controller_rclpy:main',
+          'move_turtle_logic = my_turtlebot_pkg.move_turtle_logic:main',
 
         ],
     },

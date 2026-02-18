@@ -14,44 +14,59 @@ from .controller_ui import Ui_MainWindow
 from my_turtlebot_pkg.move_turtle_logic import MoveTurtleLogic # 움직임을 담당하는 엔진 클래스
 
 import rclpy
+from PySide6.QtGui import QKeyEvent
+from PySide6.QtCore import QTimer, Qt
 
 class MainWindow(QMainWindow):
-    def __init__(self, logic_engine):
-        super(MainWindow, self).__init__()
-        self.ui = Ui_MainWindow()
-        self.ui.setupUi(self) # setupUi 함수를 호출해 MainWindow에 있는 위젯을 배치한다.
-        self.logic_engine = logic_engine
+  def __init__(self, logic_engine):
+    super(MainWindow, self).__init__()
+    self.ui = Ui_MainWindow()
+    self.ui.setupUi(self) # setupUi 함수를 호출해 MainWindow에 있는 위젯을 배치한다.
+    self.logic_engine = logic_engine
 
-        # button clicked 이벤트 핸들러로 button_clicked 함수와 연결한다.
-        self.ui.pb_go.clicked.connect(self.pb_go_clicked)
-        self.ui.pb_left.clicked.connect(self.pb_left_clicked)
-        self.ui.pb_stop.clicked.connect(self.pb_stop_clicked)
-        self.ui.pb_right.clicked.connect(self.pb_right_clicked)
-        self.ui.pb_back.clicked.connect(self.pb_back_clicked)
-        self.ui.pb_triangle.clicked.connect(self.pb_triangle_clicked)
-        self.ui.pb_square.clicked.connect(self.pb_square_clicked)
+    # button clicked 이벤트 핸들러로 button_clicked 함수와 연결한다.
+    self.ui.pb_go.clicked.connect(self.pb_go_clicked)
+    self.ui.pb_left.clicked.connect(self.pb_left_clicked)
+    self.ui.pb_stop.clicked.connect(self.pb_stop_clicked)
+    self.ui.pb_right.clicked.connect(self.pb_right_clicked)
+    self.ui.pb_back.clicked.connect(self.pb_back_clicked)
 
-    def pb_go_clicked(self):
-    	# input 위젯의 텍스트를 output 위젯에 셋한다.
-      self.logic_engine.update_key('w') # 로직 엔진의 update_key 함수를 호출하여 'w' 키 입력을 처리하도록 한다.
+    self.ui.pb_triangle.clicked.connect(self.pb_triangle_clicked)
+    self.ui.pb_square.clicked.connect(self.pb_square_clicked)
 
-    def pb_left_clicked(self):
-      self.logic_engine.update_key('a')
+    self.time = QTimer(self)
+    self.time.timeout.connect(self.ros_main_loop)
+    self.time.start(50) # 50ms마다 ros_main_loop 함수를 호출하여 ROS2 이벤트를 처리한다.
 
-    def pb_stop_clicked(self):
-      self.logic_engine.update_key('s')
+  def pb_go_clicked(self): self.logic_engine.update_key('w')
+  def pb_back_clicked(self): self.logic_engine.update_key('x')
+  def pb_left_clicked(self): self.logic_engine.update_key('a')
+  def pb_right_clicked(self): self.logic_engine.update_key('d')
+  def pb_stop_clicked(self): self.logic_engine.update_key('s')
 
-    def pb_right_clicked(self):
-      self.logic_engine.update_key('d')
+  def pb_triangle_clicked(self): self.logic_engine.action_triangle()
+  def pb_square_clicked(self): self.logic_engine.action_square()
 
-    def pb_back_clicked(self):
-      self.logic_engine.update_key('x')
+  def keyPressEvent(self, event: QKeyEvent):
+    """키보드 입력 이벤트 처리는 이 함수에서 처리한다."""
+    key_map = {
+      Qt.Key_W: 'w',
+      Qt.Key_X: 'x',
+      Qt.Key_A: 'a',
+      Qt.Key_D: 'd',
+      Qt.Key_S: 's',
+      Qt.Key_1: 'triangle', # 숫자 1키
+      Qt.Key_2: 'square'    # 숫자 2키
+    }
+    ros_key = key_map.get(event.key())
+    if ros_key:
+      if ros_key == 'triangle': self.logic_engine.action_triangle('1')
+      elif ros_key == 'square': self.logic_engine.action_square('2')
+      else: self.logic_engine.update_key(ros_key)
 
-    def pb_triangle_clicked(self):
-      self.logic_engine.action_triangle('1')
-
-    def pb_square_clicked(self):
-      self.logic_engine.action_square('2')
+  def ros_main_loop(self):
+    rclpy.spin_once(self.logic_engine, timeout_sec=0)
+    self.logic_engine.update_and_publish() # 로직 엔진의 update_and_publish 함수를 호출하여 로직을 업데이트하고 cmd_vel 메시지를 발행한다.
 
 def main(args=None):
     rclpy.init(args=args)
@@ -64,11 +79,11 @@ def main(args=None):
     window.show()
 
     try:
-        sys.exit(app.exec())
+      sys.exit(app.exec())
     except KeyboardInterrupt:
-        pass
+      pass
     finally:
-        rclpy.shutdown()
+      rclpy.shutdown()
 
 # 이 부분이 반드시 있어야 합니다!
 if __name__ == "__main__":
