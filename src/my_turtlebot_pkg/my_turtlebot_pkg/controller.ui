@@ -118,7 +118,7 @@
     <property name="geometry">
      <rect>
       <x>50</x>
-      <y>430</y>
+      <y>400</y>
       <width>141</width>
       <height>91</height>
      </rect>
@@ -136,7 +136,7 @@
     <property name="geometry">
      <rect>
       <x>230</x>
-      <y>430</y>
+      <y>400</y>
       <width>141</width>
       <height>91</height>
      </rect>
@@ -154,7 +154,7 @@
     <property name="geometry">
      <rect>
       <x>20</x>
-      <y>400</y>
+      <y>370</y>
       <width>151</width>
       <height>20</height>
      </rect>
@@ -169,6 +169,19 @@
     </property>
     <property name="alignment">
      <set>Qt::AlignCenter</set>
+    </property>
+   </widget>
+   <widget class="QLabel" name="txt_distance">
+    <property name="geometry">
+     <rect>
+      <x>50</x>
+      <y>500</y>
+      <width>321</width>
+      <height>17</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>TextLabel</string>
     </property>
    </widget>
   </widget>

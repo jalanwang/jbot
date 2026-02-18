@@ -60,24 +60,31 @@ class MoveTurtleLogic(Node):
     # GUI에서 버튼 클릭 시 호출되는 함수로, 키 입력을 처리하여 터틀봇의 움직임을 제어하는 함수
     if key in ['w','W']:
       self.velocity += 0.1
+      self.add_log(f"Velocity increased: {self.velocity:.2f}")
+    elif key in ['a','A']:
+      self.angular += 0.1
+      self.add_log(f"Angular increased: {self.angular:.2f}")
     elif key in ['s','S']:
       self.velocity = 0.0
       self.angular = 0.0
-    elif key in ['x','X']:
-      self.velocity += -0.1
-    elif key in ['a','A']:
-      self.angular += 0.1
+      self.add_log("Stopped")
     elif key in ['d','D']:
       self.angular -= 0.1
+      self.add_log(f"Angular decreased: {self.angular:.2f}")
+    elif key in ['x','X']:
+      self.velocity += -0.1
+      self.add_log(f"Velocity decreased: {self.velocity:.2f}")
 
   def action_triangle(self):
     # GUI에서 삼각형 버튼 클릭 시 호출되는 함수로, 특정 행동을 수행하도록 하는 함수
     self.get_logger().info('Triangle button clicked!')
+    self.add_log("Triangle button clicked!")
     # 여기에 삼각형 버튼 클릭 시 수행할 행동을 구현
 
   def action_square(self):
     # GUI에서 사각형 버튼 클릭 시 호출되는 함수로, 특정 행동을 수행하도록 하는 함수
     self.get_logger().info('Square button clicked!')
+    self.add_log("Square button clicked!")
     # 여기에 사각형 버튼 클릭 시 수행할 행동을 구현
 
   def update_and_publish(self):
