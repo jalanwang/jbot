@@ -11,6 +11,8 @@ from PySide6.QtCore import QFile
 # controller_ui.py에서 Ui_MainWindow 클래스를 import.
 from .controller_ui import Ui_MainWindow
 
+from my_turtlebot_pkg.move_turtle_logic import MoveTurtleLogic # 움직임을 담당하는 엔진 클래스
+
 import rclpy
 
 class MainWindow(QMainWindow):
@@ -54,12 +56,11 @@ class MainWindow(QMainWindow):
 def main(args=None):
     rclpy.init(args=args)
 
-    # # 로직 엔진 생성
-    # logic_engine = MoveTurtleLogic()
+    logic_engine = MoveTurtleLogic() # 움직임을 담당하는 엔진 하나 생성.
 
     # GUI 앱 실행 및 엔진 주입
     app = QApplication(sys.argv)
-    window = MainWindow(None)
+    window = MainWindow(logic_engine) # GUI 창에 로직 엔진을 주입하여 이벤트 핸들러에서 사용할 수 있도록 함
     window.show()
 
     try:
