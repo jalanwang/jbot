@@ -1,8 +1,8 @@
-# ~/robot/robot_ws/src/my_turtlebot_pkg/my_turtlebot_pkg/my_package/move_turtle_by_controller.py
+# ~/robot/robot_ws/src/my_turtlebot_pkg/my_turtlebot_pkg/my_package/move_turtle_by_controller_rclpy.py
 
 # PySide6를 이용하여 GUI로 키보드 입력을 받아 터틀봇을 움직이는 노드.
 # controller.ui가 설계도, controller_ui.py가 설계도를 바탕으로 생성된 GUI 클래스.
-# move_turtle_by_controller.py에서는 controller_ui.py에서 생성된 GUI 클래스를 사용하여
+# move_turtle_by_controller_rclpy.py에서는 controller_ui.py에서 생성된 GUI 클래스를 사용하여
 # GUI 이벤트 핸들러에서 ROS2 퍼블리셔를 통해 터틀봇을 제어하는 노드를 구현.
 
 import sys
