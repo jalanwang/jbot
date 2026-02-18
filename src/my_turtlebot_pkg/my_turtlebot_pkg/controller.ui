@@ -104,7 +104,7 @@
      <string>X</string>
     </property>
    </widget>
-   <widget class="QListWidget" name="listWidget">
+   <widget class="QListWidget" name="monitoring_screen">
     <property name="geometry">
      <rect>
       <x>420</x>

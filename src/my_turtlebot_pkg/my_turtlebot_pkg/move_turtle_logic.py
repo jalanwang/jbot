@@ -31,6 +31,7 @@ class MoveTurtleLogic(Node):
     self.scan_ranges = [] # 라이다 데이터의 범위를 저장하는 리스트
     self.front_min = 0.0 # 라이다 데이터에서 전방의 최소 거리값을 저장하는 변수
 
+    self.log_queue = [] # 로직 엔진에서 발생하는 로그 메시지를 저장하는 큐.
     print("input wasdx")
 
   def scan_callback(self, msg):
@@ -51,6 +52,9 @@ class MoveTurtleLogic(Node):
 
     return self.front_min < 0.3
     # 장애물이 0.3m 이내에 있으면 True 반환, 그렇지 않으면 False 반환
+
+  def add_log(self, msg):
+    self.log_queue.append(msg) # 로직 엔진에서 로그 메시지를 생성할 때마다 add_log 함수를 호출하여 로그 큐에 메시지를 추가한다.
 
   def update_key(self, key):
     # GUI에서 버튼 클릭 시 호출되는 함수로, 키 입력을 처리하여 터틀봇의 움직임을 제어하는 함수
@@ -83,8 +87,10 @@ class MoveTurtleLogic(Node):
     # ROS2 이벤트 루프(머 들어온것 있어?)를 한 번 실행하여 콜백 함수가 호출되도록 함
     # 돌아오면 바로 아래로 돌아가도록 타임아웃 0 설정
 
+    log_text=f"Obstacle Dtected! Distance: {self.front_min: .2f}m"
     if(self.is_obstacle_ahead() and self.velocity > 0):
       self.get_logger().info(f'Obstacle 발견!: {self.front_min}', throttle_duration_sec=1)
+      self.add_log(log_text)
       self.velocity = 0.0 # 필요 없는 것 같은데 일단 넣어봄. 장애물이 앞에 있으면 속도를 0으로 설정하여 멈추게 함
       self.angular = 0.0 # 필요 없는 것 같은데 일단 넣어봄. 장애물이 앞에 있으면 회전 속도도 0으로 설정하여 멈추게 함
       msg.linear.x = 0.0

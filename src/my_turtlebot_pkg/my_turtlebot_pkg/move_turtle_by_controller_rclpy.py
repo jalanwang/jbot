@@ -68,6 +68,10 @@ class MainWindow(QMainWindow):
     rclpy.spin_once(self.logic_engine, timeout_sec=0)
     self.logic_engine.update_and_publish() # 로직 엔진의 update_and_publish 함수를 호출하여 로직을 업데이트하고 cmd_vel 메시지를 발행한다.
 
+    while(self.logic_engine.log_queue):
+      log_msg = self.logic_engine.log_queue.pop(0) # 로직 엔진의 로그 큐에서 로그 메시지를 하나씩 꺼내서 GUI의 모니터링 화면에 추가한다.
+    self.ui.monitoring_screen.addItem(log_msg)
+
 def main(args=None):
     rclpy.init(args=args)
 
