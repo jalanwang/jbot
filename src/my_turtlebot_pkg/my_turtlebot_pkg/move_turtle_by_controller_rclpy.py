@@ -33,28 +33,25 @@ class MainWindow(QMainWindow):
 
     def pb_go_clicked(self):
     	# input 위젯의 텍스트를 output 위젯에 셋한다.
-      self.logic_engine.move_forward()
+      self.logic_engine.update_key('w') # 로직 엔진의 update_key 함수를 호출하여 'w' 키 입력을 처리하도록 한다.
 
     def pb_left_clicked(self):
-      self.logic_engine.update_key('w')
-
-    def pb_stop_clicked(self):
       self.logic_engine.update_key('a')
 
-    def pb_right_clicked(self):
+    def pb_stop_clicked(self):
       self.logic_engine.update_key('s')
 
-    def pb_back_clicked(self):
+    def pb_right_clicked(self):
       self.logic_engine.update_key('d')
 
     def pb_back_clicked(self):
       self.logic_engine.update_key('x')
 
     def pb_triangle_clicked(self):
-      self.logic_engine.action_triangle()
+      self.logic_engine.action_triangle('1')
 
     def pb_square_clicked(self):
-      self.logic_engine.action_square()
+      self.logic_engine.action_square('2')
 
 def main(args=None):
     rclpy.init(args=args)

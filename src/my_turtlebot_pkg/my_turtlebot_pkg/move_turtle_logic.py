@@ -21,9 +21,9 @@ from sensor_msgs.msg import LaserScan
 from my_turtlebot_pkg.my_package.my_utilz import KeyParser
 # KeyParser 클래스는 키보드 입력을 비동기적으로 처리하기 위한 유틸리티 클래스.
 
-class MoveTurtle(Node):
+class MoveTurtleLogic(Node):
   def __init__(self):
-    super().__init__('move_turtle_with_detecting_obstacle')
+    super().__init__('move_turtle_logic')
 
     self.qos_profile = QoSProfile(depth = 10)
     self.cmd_vel_publisher = self.create_publisher(Twist, '/cmd_vel', self.qos_profile)
@@ -103,7 +103,7 @@ class MoveTurtle(Node):
 
 def main(args=None):
   rclpy.init(args=args)
-  node = MoveTurtle()
+  node = MoveTurtleLogic()
   try:
     node.turtle_key_move()
   except KeyboardInterrupt:
