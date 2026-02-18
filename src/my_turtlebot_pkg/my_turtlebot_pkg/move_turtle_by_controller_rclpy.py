@@ -33,25 +33,25 @@ class MainWindow(QMainWindow):
 
     def pb_go_clicked(self):
     	# input 위젯의 텍스트를 output 위젯에 셋한다.
-      pass
+      self.logic_engine.move_forward()
 
     def pb_left_clicked(self):
-      pass
+      self.logic_engine.turn_left()
 
     def pb_stop_clicked(self):
-      pass
+      self.logic_engine.stop()
 
     def pb_right_clicked(self):
-      pass
+      self.logic_engine.turn_right()
 
     def pb_back_clicked(self):
-      pass
+      self.logic_engine.move_backward()
 
     def pb_triangle_clicked(self):
-      pass
+      self.logic_engine.action_triangle()
 
     def pb_square_clicked(self):
-      pass
+      self.logic_engine.action_square()
 
 def main(args=None):
     rclpy.init(args=args)

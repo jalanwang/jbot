@@ -1,7 +1,7 @@
-# ~/robot/robot_ws/src/my_turtlebot_pkg/my_turtlebot_pkg/move_turtle_with_detecting_obstacle.py
+# ~/robot/robot_ws/src/my_turtlebot_pkg/my_turtlebot_pkg/move_turtle_logic.py
 # 라이다 센서 데이터를 구독
 # 터틀을 움직이게 한다.
-# 현재 180를 바라보고 있다.
+# 현재 정면 좌우 45도씩 바라보고 있다.
 # 0.3m 이내에 장애물이 있으면 멈춘다.
 # 수정중
 
