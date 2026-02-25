@@ -80,7 +80,7 @@ class MainWindow(QMainWindow):
       # 새 로그 메시지를 리스트의 맨 위에 추가하여 최신 로그가 항상 보이도록 한다.
 
     if self.logic_engine.is_obstacle_ahead():
-      self.ui.txt_distance.setStyleSheet("color: red;")
+      self.ui.txt_distance.setStyleSheet("color: red; background-color: yellow;")
     else:
       self.ui.txt_distance.setStyleSheet("color: black;") # Reset to default color when no obstacle
 

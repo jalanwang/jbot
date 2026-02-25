@@ -33,7 +33,7 @@ class MoveTurtleLogic(Node):
     self.velocity = 0.0
     self.angular = 0.0
     self.scan_ranges = [] # 라이다 데이터의 범위를 저장하는 리스트
-    self.front_min = 0.0 # 라이다 데이터에서 전방의 최소 거리값을 저장하는 변수
+    self.front_min = float('inf') # 라이다 데이터에서 전방의 최소 거리값을 저장하는 변수 (초기값: 무한대)
 
     self.log_queue = [] # 로직 엔진에서 발생하는 로그 메시지를 저장하는 큐.
 
@@ -41,16 +41,24 @@ class MoveTurtleLogic(Node):
     #라이다 CW 가정
     self.scan_ranges = msg.ranges
     self.has_scan_received = True
-    scan_range = len(self.scan_ranges)
-    if scan_range == 0:
+
+    # If no ranges are reported or all ranges are invalid, assume no obstacle in the front.
+    # This prevents using a stale self.front_min value.
+    if not self.scan_ranges:
+      self.front_min = float('inf')
+      self.get_logger().warn('Scan ranges are empty, front_min set to inf.', throttle_duration_sec=1)
       return
 
-    right_range = int(scan_range / 8) # 45도
-    left_range = int(scan_range * 7 / 8) # one round -45도
+    scan_range_len = len(self.scan_ranges)
+    right_sector_end_idx = int(scan_range_len / 8) # 45도
+    left_sector_start_idx = int(scan_range_len * 7 / 8) # one round -45도
 
-    front_ranges = self.scan_ranges[0:right_range] + self.scan_ranges[left_range:]
-    if front_ranges:
-      self.front_min = min(front_ranges) # 전방의 최소 거리값을 계산하여 front_min 변수에 저장
+    # Combine the two parts of the front sector
+    front_ranges_data = self.scan_ranges[0:right_sector_end_idx] + self.scan_ranges[left_sector_start_idx:]
+    valid_front_ranges = [r for r in front_ranges_data if r > 0.0 and r != float('inf')] # 0.0 값도 유효하지 않은 것으로 간주하여 필터링
+
+    self.front_min = min(valid_front_ranges) if valid_front_ranges else float('inf')
+    self.get_logger().info(f'Calculated front_min: {self.front_min:.2f}, Raw front_ranges_data (first 10): {front_ranges_data[:10]}', throttle_duration_sec=1)
 
   def is_obstacle_ahead(self):
     if not self.has_scan_received:
@@ -100,9 +108,9 @@ class MoveTurtleLogic(Node):
     # ROS2 이벤트 루프(머 들어온것 있어?)를 한 번 실행하여 콜백 함수가 호출되도록 함
     # 돌아오면 바로 아래로 돌아가도록 타임아웃 0 설정
 
-    log_text=f"Obstacle Detected! Distance: {self.front_min: .2f}m"
-    if(self.is_obstacle_ahead() and self.velocity > 0):
+    if(self.is_obstacle_ahead()):
     #if(self.is_obstacle_ahead()):
+      log_text=f"Obstacle Detected! Distance: {self.front_min: .2f}m"
       self.get_logger().info(f'Obstacle 발견!: {self.front_min}', throttle_duration_sec=1)
       self.add_log(log_text)
       self.velocity = 0.0 # 필요 없는 것 같은데 일단 넣어봄. 장애물이 앞에 있으면 속도를 0으로 설정하여 멈추게 함
