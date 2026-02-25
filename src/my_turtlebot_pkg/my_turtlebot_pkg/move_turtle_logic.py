@@ -1,4 +1,4 @@
-# ~/robot/robot_ws/src/my_turtlebot_pkg/my_turtlebot_pkg/move_turtle_logic.py
+# ~/robot/jbot_ws/src/my_turtlebot_pkg/my_turtlebot_pkg/move_turtle_logic.py
 # 라이다 센서 데이터를 구독
 # 터틀을 움직이게 한다.
 # 현재 정면 좌우 45도씩 바라보고 있다.

@@ -1,4 +1,4 @@
-# ~/robot/robot_ws/src/my_turtlebot_pkg/my_turtlebot_pkg/my_package/move_turtle_by_controller_rclpy.py
+# ~/robot/jbot_ws/src/my_turtlebot_pkg/my_turtlebot_pkg/my_package/move_turtle_by_controller_rclpy.py
 
 # PySide6를 이용하여 GUI로 키보드 입력을 받아 터틀봇을 움직이는 노드.
 # controller.ui가 설계도, controller_ui.py가 설계도를 바탕으로 생성된 GUI 클래스.
@@ -76,6 +76,11 @@ class MainWindow(QMainWindow):
     while(self.logic_engine.log_queue): #listwidget에 로그 메시지 추가
       log_msg = self.logic_engine.log_queue.pop(0) # 로직 엔진의 로그 큐에서 로그 메시지를 하나씩 꺼내서 GUI의 모니터링 화면에 추가한다.
       self.ui.monitoring_screen.addItem(log_msg)
+
+    if self.logic_engine.is_obstacle_ahead():
+      self.ui.txt_distance.setStyleSheet("color: red;")
+    else:
+      self.ui.txt_distance.setStyleSheet("color: black;") # Reset to default color when no obstacle
 
     self.ui.txt_distance.setText(f"Distance to obstacle: {self.logic_engine.front_min:.2f} m")
     self.ui.txt_pose.setText(f"Pose: x={curr_x:.2f}, y={curr_y:.2f}, theta={curr_theta:.2f}")
