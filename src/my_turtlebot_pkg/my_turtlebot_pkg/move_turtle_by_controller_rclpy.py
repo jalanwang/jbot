@@ -75,7 +75,9 @@ class MainWindow(QMainWindow):
 
     while(self.logic_engine.log_queue): #listwidget에 로그 메시지 추가
       log_msg = self.logic_engine.log_queue.pop(0) # 로직 엔진의 로그 큐에서 로그 메시지를 하나씩 꺼내서 GUI의 모니터링 화면에 추가한다.
-      self.ui.monitoring_screen.addItem(log_msg)
+      #self.ui.monitoring_screen.addItem(log_msg)
+      self.ui.monitoring_screen.insertItem(0, log_msg)
+      # 새 로그 메시지를 리스트의 맨 위에 추가하여 최신 로그가 항상 보이도록 한다.
 
     if self.logic_engine.is_obstacle_ahead():
       self.ui.txt_distance.setStyleSheet("color: red;")

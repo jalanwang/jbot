@@ -102,6 +102,7 @@ class MoveTurtleLogic(Node):
 
     log_text=f"Obstacle Detected! Distance: {self.front_min: .2f}m"
     if(self.is_obstacle_ahead() and self.velocity > 0):
+    #if(self.is_obstacle_ahead()):
       self.get_logger().info(f'Obstacle 발견!: {self.front_min}', throttle_duration_sec=1)
       self.add_log(log_text)
       self.velocity = 0.0 # 필요 없는 것 같은데 일단 넣어봄. 장애물이 앞에 있으면 속도를 0으로 설정하여 멈추게 함
