@@ -2,7 +2,7 @@ import cv2
 import numpy as np
 import os
 
-def process_center_dice(input_dir='./data', output_dir='./preprocessed', size=(100, 100)):
+def process_center_dice(input_dir='./get_image_rt', output_dir='./preprocessed_rt', size=(100, 100)):
     if not os.path.exists(output_dir):
         os.makedirs(output_dir)
 
