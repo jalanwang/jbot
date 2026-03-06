@@ -25,7 +25,7 @@ class DataReader():
                 img.close()
 
         random.shuffle(data)
-        
+
         # 8:2 비율로 분할
         split = int(len(data) * 0.8)
         train_data = data[:split]

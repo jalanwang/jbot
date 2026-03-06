@@ -42,7 +42,7 @@ test_folder = "./test_images"
 if os.path.exists(test_folder):
     print(f"\n--- {test_folder} 내 이미지 검증 시작 ---")
     files = [f for f in os.listdir(test_folder) if f.lower().endswith(('.jpg', '.jpeg', '.png'))]
-
+    
     if not files:
         print("검증할 이미지 파일이 폴더에 없습니다.")
     else:
