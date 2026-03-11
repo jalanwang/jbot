@@ -4,7 +4,7 @@ from tensorflow import keras
 import os
 
 # 1. 학습된 모델 로드
-MODEL_PATH = "dice_model.keras"
+MODEL_PATH = "green_dice_model.keras"
 if not os.path.exists(MODEL_PATH):
     print(f"ERROR: {MODEL_PATH} 파일이 없습니다. 먼저 학습을 완료하세요.")
     exit()

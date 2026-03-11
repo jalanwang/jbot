@@ -3,103 +3,85 @@ import numpy as np
 import os
 from ultralytics import YOLO
 
-def process_green_dice_with_yolo(input_dir='./captured_images',
+def process_dice_strict_filter(input_dir='./captured_images',
                                output_dir='./preprocessed_images',
-                               model_path='yolov8n.pt', # 학습된 모델 경로로 수정
                                size=(100, 100)):
-    """
-    YOLO로 주사위 위치를 찾고, 해당 영역이 녹색인지 확인 후 100x100으로 저장
-    """
     if not os.path.exists(output_dir):
         os.makedirs(output_dir)
 
-    # 1. 모델 로드 (파일 부재 대비 예외 처리)
-    if not os.path.exists(model_path):
-        print(f"경고: {model_path}를 찾을 수 없습니다. 기본 모델(yolov8n.pt)을 사용합니다.")
-        model_path = 'yolov8n.pt'
-    
-    model = YOLO(model_path)
+    # 1. YOLOv8n 모델 로드
+    model = YOLO('yolov8n.pt')
     clahe = cv2.createCLAHE(clipLimit=2.0, tileGridSize=(8, 8))
 
     for filename in os.listdir(input_dir):
         if not filename.lower().endswith(('.jpg', '.jpeg', '.png')):
             continue
 
-        img = cv2.imread(os.path.join(input_dir, filename))
-        if img is None: continue
+        src = cv2.imread(os.path.join(input_dir, filename))
+        if src is None: continue
+        h_orig, w_orig = src.shape[:2]
 
-        h, w = img.shape[:2]
+        # 2. YOLO 추론
+        results = model(src, verbose=False)[0]
 
-        # 2. 녹색 판별을 위한 HSV 변환 및 마스크 생성
-        hsv = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
-        # 녹색 범위 (조명 상황에 따라 H값 35~85 사이 조정 가능)
-        lower_green = np.array([35, 40, 40])
-        upper_green = np.array([85, 255, 255])
+        # 3. 어두운 녹색 대응 HSV 마스크
+        hsv = cv2.cvtColor(src, cv2.COLOR_BGR2HSV)
+        lower_green = np.array([25, 10, 5]) 
+        upper_green = np.array([105, 255, 255])
         green_mask = cv2.inRange(hsv, lower_green, upper_green)
 
-        # 3. YOLO 추론
-        results = model(img, verbose=False)[0]
-
+        idx = 0
         for box in results.boxes:
-            xyxy = box.xyxy[0].cpu().numpy().astype(int)
-            x1, y1, x2, y2 = xyxy
+            x1, y1, x2, y2 = box.xyxy[0].cpu().numpy().astype(int)
+            bw, bh = x2 - x1, y2 - y1
+            
+            if bw == 0 or bh == 0: continue
 
-            # --- 녹색 덩어리 검사 ---
-            # 탐지된 박스 내부의 녹색 픽셀 수 계산
-            roi_green_mask = green_mask[y1:y2, x1:x2]
-            green_pixels = cv2.countNonZero(roi_green_mask)
-
-            # 박스 면적 대비 녹색 비율이 너무 적으면 주사위가 아니라고 판단 (예: 배경)
-            box_area = (x2 - x1) * (y2 - y1)
-            if box_area == 0 or (green_pixels / box_area) < 0.2: # 녹색 비율 20% 미만 필터링
+            # --- 필터 1: 가로세로 비율 (0.75 ~ 1.25) ---
+            aspect_ratio = bw / bh
+            if not (0.75 <= aspect_ratio <= 1.25):
                 continue
 
-            # 4. 주사위 영역 크롭 및 정밀 컨투어 추출
-            margin = 15
-            mx1, my1 = max(0, x1 - margin), max(0, y1 - margin)
-            mx2, my2 = min(w, x2 + margin), min(h, y2 + margin)
-            yolo_roi = img[my1:my2, mx1:mx2]
+            # --- 필터 2: 박스의 한쪽 길이는 300 미만 ---
+            if bw >= 300 or bh >= 300:
+                continue
 
-            gray = cv2.cvtColor(yolo_roi, cv2.COLOR_BGR2GRAY)
-            # 녹색 주사위는 배경과 대비가 클 것이므로 가우시안 블러 후 Otsu 이진화
-            blurred = cv2.GaussianBlur(gray, (5, 5), 0)
-            _, thresh = cv2.threshold(blurred, 0, 255, cv2.THRESH_BINARY_INV + cv2.THRESH_OTSU)
+            # --- 필터 3: 박스 내 녹색 비율 (0.5 이상) ---
+            roi_mask = green_mask[y1:y2, x1:x2]
+            green_ratio = cv2.countNonZero(roi_mask) / (bw * bh)
+            if green_ratio < 0.5:
+                continue
 
-            contours, _ = cv2.findContours(thresh, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-
-            if contours:
-                c = max(contours, key=cv2.contourArea)
-                rx, ry, rw, rh = cv2.boundingRect(c)
-                side = int(max(rw, rh) * 1.2)
-                
-                # 중앙점 기준 정사각형 크롭
-                rcx, rcy = rx + rw // 2, ry + rh // 2
-                nx1 = max(0, rcx - side // 2)
-                ny1 = max(0, rcy - side // 2)
-                
-                dice_crop = yolo_roi[ny1:ny1+side, nx1:nx1+side]
-            else:
-                dice_crop = yolo_roi
-
-            if dice_crop.size == 0: continue
-
-            # 5. 리사이즈 및 화질 개선
-            resized = cv2.resize(dice_crop, size, interpolation=cv2.INTER_CUBIC)
+            # --- 정사각형 영역 계산 및 비율 유지 추출 ---
+            cx, cy = x1 + bw // 2, y1 + bh // 2
+            side = max(bw, bh) # 긴 변 기준
             
-            # CLAHE 적용
-            lab = cv2.cvtColor(resized, cv2.COLOR_BGR2LAB)
-            l, a, b = cv2.split(lab)
-            l_eq = clahe.apply(l)
-            equalized = cv2.cvtColor(cv2.merge((l_eq, a, b)), cv2.COLOR_LAB2BGR)
+            # 이미지 경계를 벗어나지 않도록 좌표 클램핑 (정사각형 유지)
+            nx1 = max(0, cx - side // 2)
+            ny1 = max(0, cy - side // 2)
+            nx2 = nx1 + side
+            ny2 = ny1 + side
 
-            # 샤프닝 (Unsharp Masking)
-            gauss = cv2.GaussianBlur(equalized, (0, 0), 2.0)
-            final_img = cv2.addWeighted(equalized, 1.5, gauss, -0.5, 0)
+            if nx2 > w_orig:
+                nx2 = w_orig
+                nx1 = max(0, nx2 - side)
+            if ny2 > h_orig:
+                ny2 = h_orig
+                ny1 = max(0, ny2 - side)
 
-            # 6. 저장
-            save_path = os.path.join(output_dir, f"green_{filename}")
-            cv2.imwrite(save_path, final_img)
-            print(f"전처리 완료: {filename} (Green Dice Detected)")
+            # 정사각형 크롭 및 변환
+            dice_square_crop = src[ny1:ny2, nx1:nx2]
+            gray = cv2.cvtColor(dice_square_crop, cv2.COLOR_BGR2GRAY)
+            
+            # 최종 리사이즈 및 선명화
+            final_res = cv2.resize(gray, size, interpolation=cv2.INTER_AREA)
+            final_res = clahe.apply(final_res)
+
+            # 4. 저장
+            save_name = f"strict_dice_{idx}_{filename}"
+            cv2.imwrite(os.path.join(output_dir, save_name), final_res)
+            print(f"추출: {save_name} | Ratio: {aspect_ratio:.2f} | Green: {green_ratio:.2f} | MaxSide: {side}")
+            idx += 1
 
 if __name__ == "__main__":
-    process_green_dice_with_yolo()
+    process_dice_strict_filter()
