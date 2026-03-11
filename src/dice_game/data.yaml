@@ -1,6 +1,6 @@
-train: ../train/images
-val: ../valid/images
-test: ../test/images
+train: ./workflow/train/images
+val: ./workflow/valid/images
+test: ./workflow/test/images
 
 nc: 6
 names: ['dice_1', 'dice_2', 'dice_3', 'dice_4', 'dice_5', 'dice_6']
