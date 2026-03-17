@@ -2,7 +2,12 @@ import cv2
 import numpy as np
 import os
 
-def process_center_dice(input_dir='./data', output_dir='./preprocessed', size=(100, 100)):
+from project_paths import CAPTURED_IMAGES_DIR, PREPROCESSED_DIR
+
+def process_center_dice(input_dir=None, output_dir=None, size=(100, 100)):
+    input_dir = input_dir or str(CAPTURED_IMAGES_DIR)
+    output_dir = output_dir or str(PREPROCESSED_DIR)
+
     if not os.path.exists(output_dir):
         os.makedirs(output_dir)
 
@@ -51,4 +56,5 @@ def process_center_dice(input_dir='./data', output_dir='./preprocessed', size=(1
         else:
             print(f"실패(객체 없음): {filename}")
 
-process_center_dice()
+if __name__ == '__main__':
+    process_center_dice()

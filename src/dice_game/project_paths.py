@@ -10,6 +10,7 @@ PROCESSED_DIR = DATASETS_DIR / 'processed'
 RAW_DIR = DATASETS_DIR / 'raw'
 
 CAPTURED_IMAGES_DIR = CAPTURES_DIR / 'images'
+REALTIME_INPUT_DIR = CAPTURES_DIR / 'realtime_input'
 PREPROCESSED_IMAGES_DIR = PROCESSED_DIR / 'images'
 PREPROCESSED_DIR = PROCESSED_DIR / 'base'
 PREPROCESSED_RT_DIR = PROCESSED_DIR / 'realtime'
@@ -23,7 +24,6 @@ WORKFLOW_DIR = ROOT_DIR / 'workflow'
 def _candidate_files(name):
     return [
         MODELS_DIR / name,
-        ROOT_DIR / name,
     ]
 
 

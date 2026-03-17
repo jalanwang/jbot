@@ -2,11 +2,16 @@ import cv2
 import numpy as np
 import os
 
-def process_center_dice_sharp(input_dir='./get_image_rt', output_dir='./preprocessed_rt', size=(100, 100)):
+from project_paths import PREPROCESSED_RT_DIR, REALTIME_INPUT_DIR
+
+def process_center_dice_sharp(input_dir=None, output_dir=None, size=(100, 100)):
     """
     확대된 해상도(640x480) 이미지의 정중앙 ROI 영역을 추출하여
     히스토그램 보정(CLAHE)과 샤프닝을 적용하고 100x100으로 저장하는 함수
     """
+    input_dir = input_dir or str(REALTIME_INPUT_DIR)
+    output_dir = output_dir or str(PREPROCESSED_RT_DIR)
+
     if not os.path.exists(output_dir):
         os.makedirs(output_dir)
 

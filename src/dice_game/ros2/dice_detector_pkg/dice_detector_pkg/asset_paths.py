@@ -46,16 +46,29 @@ def resolve_model_paths(module_dir, model_dir='', yolo_model_path='', keras_mode
         return str(explicit_yolo), str(explicit_keras)
 
     roots = _candidate_roots(module_dir, model_dir)
+    model_roots = []
+
+    for root in roots:
+        if root.name == 'models':
+            model_roots.append(root)
+        model_roots.append(root / 'models')
+
+    unique_model_roots = []
+    seen_model_roots = set()
+    for model_root in model_roots:
+        model_root_str = str(model_root)
+        if model_root_str not in seen_model_roots:
+            seen_model_roots.add(model_root_str)
+            unique_model_roots.append(model_root)
+
     yolo_candidates = []
     keras_candidates = []
 
-    for root in roots:
+    for root in unique_model_roots:
         yolo_candidates.extend([
-            root / 'models' / 'yolov8n.pt',
             root / 'yolov8n.pt',
         ])
         keras_candidates.extend([
-            root / 'models' / 'green_dice_model.keras',
             root / 'green_dice_model.keras',
         ])
 
@@ -64,8 +77,9 @@ def resolve_model_paths(module_dir, model_dir='', yolo_model_path='', keras_mode
 
     if resolved_yolo is None or resolved_keras is None:
         raise FileNotFoundError(
-            'Could not resolve model files. Set model_dir, yolo_model_path, keras_model_path, '
-            'or export DICE_GAME_ROOT.'
+            'Could not resolve model files from a models directory. '
+            'Set model_dir to a models directory, set explicit model paths, '
+            'or export DICE_GAME_MODEL_DIR.'
         )
 
     return str(resolved_yolo), str(resolved_keras)
