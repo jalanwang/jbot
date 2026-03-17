@@ -3,16 +3,21 @@ import numpy as np
 import os
 from ultralytics import YOLO
 
-def process_green_dice_512_gray(input_dir='./captured_images',
-                                output_dir='./preprocessed_images',
+from project_paths import CAPTURED_IMAGES_DIR, PREPROCESSED_IMAGES_DIR, resolve_model_file
+
+def process_green_dice_512_gray(input_dir=None,
+                                output_dir=None,
                                 size=(100, 100)):
+    input_dir = input_dir or str(CAPTURED_IMAGES_DIR)
+    output_dir = output_dir or str(PREPROCESSED_IMAGES_DIR)
+
     if not os.path.exists(output_dir):
         os.makedirs(output_dir)
 
     # 1. yolov8n.pt 로드
-    model = YOLO('yolov8n.pt')
+    model = YOLO(str(resolve_model_file('yolov8n.pt')))
     clahe = cv2.createCLAHE(clipLimit=2.0, tileGridSize=(8, 8))
-    
+
     # ROI 설정 (중앙 512x512)
     ROI_SIZE = 512
 
@@ -22,18 +27,18 @@ def process_green_dice_512_gray(input_dir='./captured_images',
 
         full_img = cv2.imread(os.path.join(input_dir, filename))
         if full_img is None: continue
-        
+
         h, w = full_img.shape[:2]
 
         # --- 2. 중앙 512x512 ROI 추출 ---
         cx, cy = w // 2, h // 2
         rx1, ry1 = cx - ROI_SIZE // 2, cy - ROI_SIZE // 2
         rx2, ry2 = cx + ROI_SIZE // 2, cy + ROI_SIZE // 2
-        
+
         # 이미지 경계 처리 (512보다 작을 경우 대비)
         rx1, ry1 = max(0, rx1), max(0, ry1)
         rx2, ry2 = min(w, rx2), min(h, ry2)
-        
+
         roi_img = full_img[ry1:ry2, rx1:rx2].copy()
         roi_h, roi_w = roi_img.shape[:2]
 
@@ -45,7 +50,7 @@ def process_green_dice_512_gray(input_dir='./captured_images',
 
         # --- 4. YOLOv8n 추론 (ROI 영역 내에서만) ---
         results = model(roi_img, verbose=False)[0]
-        
+
         for i, box in enumerate(results.boxes):
             xyxy = box.xyxy[0].cpu().numpy().astype(int)
             bx1, by1, bx2, by2 = xyxy
@@ -82,7 +87,7 @@ def process_green_dice_512_gray(input_dir='./captured_images',
             # 리사이즈 및 그레이스케일 최종 처리
             resized = cv2.resize(final_crop, size, interpolation=cv2.INTER_CUBIC)
             gray_res = cv2.cvtColor(resized, cv2.COLOR_BGR2GRAY)
-            
+
             # CLAHE 및 선명화
             gray_res = clahe.apply(gray_res)
             gauss = cv2.GaussianBlur(gray_res, (0, 0), 2.0)

@@ -2,11 +2,16 @@ import cv2
 import numpy as np
 import os
 
-def process_center_dice_sharp(input_dir='./captured_images', output_dir='./preprocessed_images', size=(100, 100)):
+from project_paths import CAPTURED_IMAGES_DIR, PREPROCESSED_IMAGES_DIR
+
+def process_center_dice_sharp(input_dir=None, output_dir=None, size=(100, 100)):
     """
     Iriun에서 캡처된 고해상도(1280x720) 이미지의 정중앙 ROI 영역을 추출하여
     히스토그램 보정(CLAHE)과 샤프닝을 적용하고 100x100으로 저장하는 함수
     """
+    input_dir = input_dir or str(CAPTURED_IMAGES_DIR)
+    output_dir = output_dir or str(PREPROCESSED_IMAGES_DIR)
+
     if not os.path.exists(output_dir):
         os.makedirs(output_dir)
 

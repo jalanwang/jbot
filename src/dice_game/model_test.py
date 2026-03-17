@@ -3,13 +3,15 @@ from PIL import Image
 from tensorflow import keras
 import os
 
+from project_paths import TEST_IMAGES_DIR, resolve_model_file
+
 # 1. 학습된 모델 로드
-MODEL_PATH = "green_dice_model.keras"
-if not os.path.exists(MODEL_PATH):
+MODEL_PATH = resolve_model_file('green_dice_model.keras')
+if not MODEL_PATH.exists():
     print(f"ERROR: {MODEL_PATH} 파일이 없습니다. 먼저 학습을 완료하세요.")
     exit()
 
-model = keras.models.load_model(MODEL_PATH)
+model = keras.models.load_model(str(MODEL_PATH))
 
 # 2. 클래스 라벨 (DataReader와 동일한 순서)
 labels = ["1", "2", "3", "4", "5", "6"]
@@ -37,12 +39,12 @@ def predict_dice(img_path):
         print(f"파일 처리 중 오류 발생 ({img_path}): {e}")
 
 # 3. 폴더 내 모든 사진 검증
-test_folder = "./test_images"
+test_folder = TEST_IMAGES_DIR
 
-if os.path.exists(test_folder):
+if test_folder.exists():
     print(f"\n--- {test_folder} 내 이미지 검증 시작 ---")
     files = [f for f in os.listdir(test_folder) if f.lower().endswith(('.jpg', '.jpeg', '.png'))]
-    
+
     if not files:
         print("검증할 이미지 파일이 폴더에 없습니다.")
     else:

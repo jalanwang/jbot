@@ -2,6 +2,8 @@ from tensorflow import keras
 import data_reader
 import numpy as np
 
+from project_paths import MODELS_DIR
+
 # 1. 데이터 읽기
 dr = data_reader.DataReader()
 
@@ -10,7 +12,7 @@ if dr.train_X.shape[-1] == 3:
     # 단순 평균(np.mean)보다 공식적인 Grayscale 변환 비율(Luma)을 적용하는 것이 더 정확함
     dr.train_X = (0.299 * dr.train_X[:,:,:,0] + 0.587 * dr.train_X[:,:,:,1] + 0.114 * dr.train_X[:,:,:,2])
     dr.test_X = (0.299 * dr.test_X[:,:,:,0] + 0.587 * dr.test_X[:,:,:,1] + 0.114 * dr.test_X[:,:,:,2])
-    
+
     # Keras 입력 규격을 위해 마지막에 1채널 차원 추가 (N, 100, 100, 1)
     dr.train_X = np.expand_dims(dr.train_X, axis=-1)
     dr.test_X = np.expand_dims(dr.test_X, axis=-1)
@@ -41,9 +43,10 @@ model.compile(optimizer='adam',
 print(f"Model Input Shape: {model.input_shape}")
 print("\n--- 1채널 기반 학습 시작 ---")
 
-history = model.fit(dr.train_X, dr.train_Y, 
+history = model.fit(dr.train_X, dr.train_Y,
                     epochs=EPOCHS,
                     validation_data=(dr.test_X, dr.test_Y))
 
 # 3. 모델 저장
-model.save("green_dice_model.keras")
+MODELS_DIR.mkdir(exist_ok=True)
+model.save(str(MODELS_DIR / 'green_dice_model.keras'))

@@ -1,0 +1,8 @@
+dice_motion:
+  ros__parameters:
+    result_topic: /dice/result
+    ready_topic: /dice/ready
+    cmd_vel_topic: /cmd_vel
+    angular_speed_deg: 30.0
+    pause_seconds: 0.15
+    timer_period: 0.05

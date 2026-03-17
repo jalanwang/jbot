@@ -2,9 +2,14 @@ import cv2
 import numpy as np
 import os
 
-def crop_enhanced_green_lumps(input_dir='./captured_images',
-                               output_dir='./preprocessed_images',
+from project_paths import CAPTURED_IMAGES_DIR, PREPROCESSED_IMAGES_DIR
+
+def crop_enhanced_green_lumps(input_dir=None,
+                               output_dir=None,
                                size=(100, 100)):
+    input_dir = input_dir or str(CAPTURED_IMAGES_DIR)
+    output_dir = output_dir or str(PREPROCESSED_IMAGES_DIR)
+
     if not os.path.exists(output_dir):
         os.makedirs(output_dir)
 
@@ -36,7 +41,7 @@ def crop_enhanced_green_lumps(input_dir='./captured_images',
         # 3. 보정된 이미지로 HSV 마스크 생성 (어두운 녹색 타겟)
         hsv = cv2.cvtColor(roi_enhanced, cv2.COLOR_BGR2HSV)
         # V(밝기) 하한선을 20으로 낮추고, S(채도) 범위를 넓힘
-        lower_green = np.array([30, 25, 20]) 
+        lower_green = np.array([30, 25, 20])
         upper_green = np.array([95, 255, 255])
         mask = cv2.inRange(hsv, lower_green, upper_green)
 
@@ -53,16 +58,16 @@ def crop_enhanced_green_lumps(input_dir='./captured_images',
 
             # 5. 패딩 없이 딱 맞게 바운딩 박스 추출
             bx, by, bw, bh = cv2.boundingRect(cnt)
-            
+
             # 보정 전 원본 ROI 혹은 보정본에서 크롭 (학습용은 보정본 추천)
             lump_crop = roi_enhanced[by:by+bh, bx:bx+bw]
 
             # 6. 최종 그레이스케일 변환 및 저장
             gray = cv2.cvtColor(lump_crop, cv2.COLOR_BGR2GRAY)
-            
+
             # 100x100 리사이즈 (규격화)
             resized = cv2.resize(gray, size, interpolation=cv2.INTER_AREA)
-            
+
             # 저장 전 한 번 더 선명화
             final_equalized = clahe.apply(resized)
             blur = cv2.GaussianBlur(final_equalized, (0, 0), 1.0)

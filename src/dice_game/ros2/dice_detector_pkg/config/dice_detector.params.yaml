@@ -1,0 +1,14 @@
+dice_detector:
+  ros__parameters:
+    camera_topic: /camera/image_raw
+    result_topic: /dice/result
+    ready_topic: /dice/ready
+    confirmation_seconds: 1.0
+    green_ratio_threshold: 0.4
+    square_ratio_min: 0.8
+    square_ratio_max: 1.2
+    max_box_size: 200
+    model_dir: /home/robot/jbot_ws/src/dice_game/models
+    yolo_model_path: ''
+    keras_model_path: ''
+    show_window: true

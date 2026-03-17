@@ -1,7 +1,9 @@
 #!/bin/bash
 
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+
 # 설정 변수
-SAVE_DIR="./captured_images"
+SAVE_DIR="${SCRIPT_DIR}/datasets/captures/images"
 INTERVAL=3.0
 HZ=$(echo "scale=3; 1/$INTERVAL" | bc) # 0.333Hz
 INPUT_TOPIC="/camera/image_raw"

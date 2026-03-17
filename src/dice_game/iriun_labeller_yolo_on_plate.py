@@ -3,10 +3,16 @@ import numpy as np
 import os
 from ultralytics import YOLO
 
-def process_dice_on_purple_pad(input_dir='./captured_images',
-                               output_dir='./preprocessed_images',
-                               model_path='yolov8n.pt', # 알반 모델 경로
+from project_paths import CAPTURED_IMAGES_DIR, PREPROCESSED_IMAGES_DIR, resolve_model_file
+
+def process_dice_on_purple_pad(input_dir=None,
+                               output_dir=None,
+                               model_path=None,
                                size=(100, 100)):
+    input_dir = input_dir or str(CAPTURED_IMAGES_DIR)
+    output_dir = output_dir or str(PREPROCESSED_IMAGES_DIR)
+    model_path = model_path or str(resolve_model_file('yolov8n.pt'))
+
     if not os.path.exists(output_dir):
         os.makedirs(output_dir)
 
@@ -39,11 +45,11 @@ def process_dice_on_purple_pad(input_dir='./captured_images',
             # --- 필터링: 바운딩 박스 내부에 보라색이 있는지 확인 ---
             # 박스 내부의 마스크 영역만 슬라이싱
             roi_mask = purple_mask[y1:y2, x1:x2]
-            
+
             # 보라색 픽셀 비율 계산 (주사위가 판 위에 있다면 테두리 근처에 보라색이 잡힘)
             # 혹은 박스 하단부나 주변부 픽셀을 체크
             purple_pixel_count = cv2.countNonZero(roi_mask)
-            
+
             # 보라색 픽셀이 거의 없다면 보라판 밖의 주사위로 간주하고 무시
             if purple_pixel_count < 50: # 최소 50픽셀 이상 보라색이 검출되어야 함
                 continue
@@ -66,7 +72,7 @@ def process_dice_on_purple_pad(input_dir='./captured_images',
                 rx, ry, rw, rh = cv2.boundingRect(c)
                 side = int(max(rw, rh) * 1.2)
                 rcx, rcy = rx + rw // 2, ry + rh // 2
-                
+
                 # 정사각형 크롭 좌표 계산
                 nx1 = max(0, rcx - side // 2)
                 ny1 = max(0, rcy - side // 2)
@@ -82,7 +88,7 @@ def process_dice_on_purple_pad(input_dir='./captured_images',
             l, a, b = cv2.split(lab)
             l_eq = clahe.apply(l)
             equalized = cv2.cvtColor(cv2.merge((l_eq, a, b)), cv2.COLOR_LAB2BGR)
-            
+
             # 샤프닝
             gauss = cv2.GaussianBlur(equalized, (0, 0), 2.0)
             sharpened = cv2.addWeighted(equalized, 1.5, gauss, -0.5, 0)

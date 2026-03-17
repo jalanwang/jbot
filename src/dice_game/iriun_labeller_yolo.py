@@ -3,13 +3,19 @@ import numpy as np
 import os
 from ultralytics import YOLO
 
-def process_dice_with_yolo(input_dir='./captured_images',
-                           output_dir='./preprocessed_images',
-                           model_path='yolov8n.pt', # 학습시킨 모델 경로로 수정 필요
+from project_paths import CAPTURED_IMAGES_DIR, PREPROCESSED_IMAGES_DIR, resolve_model_file
+
+def process_dice_with_yolo(input_dir=None,
+                           output_dir=None,
+                           model_path=None,
                            size=(100, 100)):
     """
     YOLO로 주사위 위치를 찾고, 해당 영역 내에서 컨투어를 추출하여 100x100으로 저장
     """
+    input_dir = input_dir or str(CAPTURED_IMAGES_DIR)
+    output_dir = output_dir or str(PREPROCESSED_IMAGES_DIR)
+    model_path = model_path or str(resolve_model_file('yolov8n.pt'))
+
     if not os.path.exists(output_dir):
         os.makedirs(output_dir)
 

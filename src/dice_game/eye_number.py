@@ -1,12 +1,13 @@
 import cv2
 import numpy as np
-import os
 from ultralytics import YOLO
 import tensorflow as tf
 
+from project_paths import resolve_model_file
+
 # 1. 모델 로드 (YOLOv8 + 사용자 학습 Keras 모델)
-yolo_model = YOLO('yolov8n.pt')
-dice_classifier = tf.keras.models.load_model('green_dice_model.keras')
+yolo_model = YOLO(str(resolve_model_file('yolov8n.pt')))
+dice_classifier = tf.keras.models.load_model(str(resolve_model_file('green_dice_model.keras')))
 print(f"Model Input Shape: {dice_classifier.input_shape}")
 
 # 전처리를 위한 CLAHE 객체
@@ -20,10 +21,10 @@ def get_square_crop(frame, x1, y1, x2, y2, target_size=(100, 100)):
     h_orig, w_orig = frame.shape[:2]
     bw, bh = x2 - x1, y2 - y1
     cx, cy = x1 + bw // 2, y1 + bh // 2
-    
+
     # 300미만 제약은 루프에서 검사하므로 여기서는 긴 변 기준으로 정사각형 설정
     side = max(bw, bh)
-    
+
     nx1 = max(0, cx - side // 2)
     ny1 = max(0, cy - side // 2)
     nx2 = nx1 + side
@@ -44,7 +45,7 @@ def get_square_crop(frame, x1, y1, x2, y2, target_size=(100, 100)):
     gray = cv2.cvtColor(crop, cv2.COLOR_BGR2GRAY)
     resized = cv2.resize(gray, target_size, interpolation=cv2.INTER_AREA)
     enhanced = clahe.apply(resized)
-    
+
     # 모델 입력 형태 (1, 100, 100, 1) 및 정규화
     input_arr = enhanced.astype('float32') / 255.0
     input_arr = np.expand_dims(input_arr, axis=(0, -1))
@@ -59,7 +60,7 @@ while cap.isOpened():
 
     # YOLO 탐지
     results = yolo_model(frame, verbose=False)[0]
-    
+
     # 녹색 필터링용 마스크 (실시간 어두운 환경 대응)
     hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
     lower_green = np.array([25, 10, 5])
@@ -81,10 +82,10 @@ while cap.isOpened():
         green_ratio = cv2.countNonZero(roi_mask) / (bw * bh)
 
         if (0.75 <= aspect_ratio <= 1.25) and (bw < 300 and bh < 300) and (green_ratio >= 0.5):
-            
+
             # 분류 모델 입력 전처리
             input_data = get_square_crop(frame, x1, y1, x2, y2)
-            
+
             if input_data is not None:
                 # Keras 모델 예측
                 preds = dice_classifier.predict(input_data, verbose=0)
@@ -99,7 +100,7 @@ while cap.isOpened():
                 cv2.putText(frame, text, (x1, y1 - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.7, color, 2)
 
     cv2.imshow('Green Dice Real-time Analysis', frame)
-    
+
     if cv2.waitKey(1) & 0xFF == ord('q'):
         break
 

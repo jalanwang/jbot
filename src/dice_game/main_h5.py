@@ -1,6 +1,8 @@
 from tensorflow import keras
 import data_reader
 
+from project_paths import MODELS_DIR
+
 EPOCHS = 50 # 주사위 눈은 정교하므로 에포크를 조금 더 늘림
 dr = data_reader.DataReader()
 
@@ -25,4 +27,5 @@ history = model.fit(dr.train_X, dr.train_Y, epochs=EPOCHS,
                     validation_data=(dr.test_X, dr.test_Y))
 
 # 모델 저장
-model.save("dice_model_venv.keras")
+MODELS_DIR.mkdir(exist_ok=True)
+model.save(str(MODELS_DIR / 'dice_model_venv.keras'))
