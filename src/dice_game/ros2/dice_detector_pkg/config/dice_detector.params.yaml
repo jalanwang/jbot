@@ -8,7 +8,7 @@ dice_detector:
     square_ratio_min: 0.8
     square_ratio_max: 1.2
     max_box_size: 200
-    model_dir: /home/robot/jbot_ws/src/dice_game/models
+    model_dir: ''
     yolo_model_path: ''
     keras_model_path: ''
     show_window: true

@@ -18,14 +18,23 @@ labels = ["1", "2", "3", "4", "5", "6"]
 
 # 모델의 입력 사이즈 자동 추출
 input_h, input_w = model.input_shape[1:3]
+input_c = model.input_shape[-1]
 
 def predict_dice(img_path):
     try:
         # 이미지 로드 및 전처리
-        img_raw = Image.open(img_path).convert("RGB")
+        if input_c == 1:
+            img_raw = Image.open(img_path).convert("L")
+        else:
+            img_raw = Image.open(img_path).convert("RGB")
+
         img_resized = img_raw.resize((input_w, input_h))
 
         img_array = np.asarray(img_resized) / 255.0
+
+        if input_c == 1:
+            img_array = np.expand_dims(img_array, axis=-1)
+
         img_input = np.expand_dims(img_array, axis=0)
 
         # 예측 실행

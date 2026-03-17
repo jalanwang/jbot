@@ -40,10 +40,22 @@ class DiceDetectorNode(Node):
         self.square_ratio_min = float(self.get_parameter('square_ratio_min').value)
         self.square_ratio_max = float(self.get_parameter('square_ratio_max').value)
         self.max_box_size = int(self.get_parameter('max_box_size').value)
-        model_dir = self.get_parameter('model_dir').value
+        configured_model_dir = str(self.get_parameter('model_dir').value).strip()
+        env_model_dir = os.environ.get('DICE_GAME_MODEL_DIR', '').strip()
+        model_dir = configured_model_dir or env_model_dir
         yolo_model_path = self.get_parameter('yolo_model_path').value
         keras_model_path = self.get_parameter('keras_model_path').value
         self.show_window = bool(self.get_parameter('show_window').value)
+
+        if configured_model_dir:
+            self.get_logger().info(f'Using model_dir from ROS parameter: {configured_model_dir}')
+        elif env_model_dir:
+            self.get_logger().info(f'Using model_dir from environment DICE_GAME_MODEL_DIR: {env_model_dir}')
+        else:
+            self.get_logger().warning(
+                'model_dir is not set via ROS parameter or DICE_GAME_MODEL_DIR. '
+                'Will try auto resolution from module path.'
+            )
 
         try:
             resolved_yolo_path, resolved_keras_path = resolve_model_paths(
@@ -67,6 +79,7 @@ class DiceDetectorNode(Node):
         self.pending_result = None
         self.pending_result_since = None
         self.detection_enabled = True
+        self.last_detected = None  # 이전 프레임의 탐지 결과 추적
 
         self.result_publisher = self.create_publisher(Int32, result_topic, 10)
         self.create_subscription(Image, camera_topic, self.image_callback, 10)
@@ -79,6 +92,7 @@ class DiceDetectorNode(Node):
         if not self.detection_enabled:
             self.pending_result = None
             self.pending_result_since = None
+            self.last_detected = None
 
     def get_square_crop(self, frame, x1, y1, x2, y2, target_size=(100, 100)):
         h_orig, w_orig = frame.shape[:2]
@@ -109,30 +123,32 @@ class DiceDetectorNode(Node):
         return np.expand_dims(input_arr, axis=(0, -1))
 
     def update_pending_result(self, detected_result):
-        if detected_result is None:
-            self.pending_result = None
-            self.pending_result_since = None
+        # 현재 상태 결정 (0=없음, 1-6=감지)
+        current_state = detected_result if detected_result is not None else 0
+
+        # 이전 상태와 현재 상태 비교
+        if self.last_detected != current_state:
+            # 상태 변경: 새로운 pending 설정
+            self.pending_result = current_state
+            self.pending_result_since = time.monotonic()
+            self.last_detected = current_state
+            state_desc = f'Dice appeared: {current_state}' if current_state > 0 else 'Dice disappeared'
+            self.get_logger().info(f'{state_desc} (starting confirmation)')
             return
 
+        # 이미 pending 중인 같은 상태인 경우
         now = time.monotonic()
-        if detected_result != self.pending_result:
-            self.pending_result = detected_result
-            self.pending_result_since = now
-            return
-
         if self.pending_result_since is None:
             self.pending_result_since = now
-            return
 
-        if (now - self.pending_result_since) < self.confirmation_seconds:
-            return
-
-        msg = Int32()
-        msg.data = detected_result
-        self.result_publisher.publish(msg)
-        self.pending_result = None
-        self.pending_result_since = None
-        self.get_logger().info(f'Published dice result: {detected_result}')
+        if (now - self.pending_result_since) >= self.confirmation_seconds:
+            msg = Int32()
+            msg.data = current_state
+            self.result_publisher.publish(msg)
+            action = f'Published dice result: {current_state}' if current_state > 0 else 'Published dice disappearance: 0'
+            self.get_logger().info(action)
+            self.pending_result = None
+            self.pending_result_since = None
 
     def image_callback(self, msg):
         if not self.detection_enabled:

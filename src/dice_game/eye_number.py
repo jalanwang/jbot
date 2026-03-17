@@ -52,7 +52,8 @@ def get_square_crop(frame, x1, y1, x2, y2, target_size=(100, 100)):
     return input_arr
 
 # 2. 비디오 스트림 처리
-cap = cv2.VideoCapture(0) # 카메라 인덱스 또는 비디오 파일 경로
+cap = cv2.VideoCapture(3) # 카메라 인덱스 또는 비디오 파일 경로
+# 0:모바일, 1: 노트북 내장, 2:외장 카메라, 3: USB 카메라 등 환경에 따라 조정 필요
 
 while cap.isOpened():
     ret, frame = cap.read()
