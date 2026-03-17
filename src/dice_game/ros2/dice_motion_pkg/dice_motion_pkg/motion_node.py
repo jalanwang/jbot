@@ -11,7 +11,7 @@ class DiceMotionNode(Node):
     def __init__(self):
         super().__init__('dice_motion')
 
-        self.declare_parameter('result_topic', '/dice/result')
+        self.declare_parameter('result_topic', '/eye/result')
         self.declare_parameter('ready_topic', '/dice/ready')
         self.declare_parameter('cmd_vel_topic', '/cmd_vel')
         self.declare_parameter('angular_speed_deg', 30.0)
@@ -87,11 +87,13 @@ class DiceMotionNode(Node):
         self.get_logger().info('Motion finished. Detector can resume.')
 
     def result_callback(self, msg):
+        dice_value = int(msg.data)
+        self.get_logger().info(f'Received dice result: {dice_value} (motion_active={self.motion_active})')
+
         if self.motion_active:
             self.get_logger().info('Ignoring dice result while motion is active.')
             return
 
-        dice_value = int(msg.data)
         if dice_value < 1 or dice_value > 6:
             self.get_logger().warning(f'Ignoring out-of-range dice result: {dice_value}')
             return
@@ -117,6 +119,7 @@ class DiceMotionNode(Node):
         if now - self.motion_step_started >= step['duration']:
             self.motion_step_index += 1
             self.motion_step_started = None
+            self.get_logger().info(f'Motion step {self.motion_step_index} completed')
 
 
 def main(args=None):
